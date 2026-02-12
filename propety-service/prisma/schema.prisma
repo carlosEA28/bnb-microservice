@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Property {
+  id                String            @id @default(uuid())
+  host_id           String
+  title             String
+  description       String
+  city              String
+  country           String
+  price_per_night   Decimal           @db.Decimal(10, 2)
+  max_guests        Int
+  created_at        DateTime          @default(now())
+  propertyImages    PropertyImage[]
+  propertyAmenities PropertyAmenity[]
+}
+
+model PropertyImage {
+  id          String   @id @default(uuid())
+  property_id String
+  url         String
+  created_at  DateTime @default(now())
+
+  property Property @relation(fields: [property_id], references: [id])
+}
+
+model Amenity {
+  id                String            @id @default(uuid())
+  name              String            @unique
+  created_at        DateTime          @default(now())
+  propertyAmenities PropertyAmenity[]
+}
+
+model PropertyAmenity {
+  property_id String
+  amenity_id  String
+
+  property Property @relation(fields: [property_id], references: [id])
+  amenity  Amenity  @relation(fields: [amenity_id], references: [id])
+
+  @@id([property_id, amenity_id])
+}
