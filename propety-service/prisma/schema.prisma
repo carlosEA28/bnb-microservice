@@ -14,6 +14,7 @@ model Property {
   description       String
   city              String
   country           String
+  isActive          Boolean           @default(true)
   price_per_night   Decimal           @db.Decimal(10, 2)
   max_guests        Int
   created_at        DateTime          @default(now())
