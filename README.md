@@ -97,19 +97,6 @@ simple-airbnb/
 └── docker-compose.yml   # Orquestração dos containers
 ```
 
-## 🚪 Kong API Gateway
-
-O Kong atua como ponto de entrada único para todas as requisições, oferecendo:
-
-### Funcionalidades
-
-- **Roteamento** - Direciona requisições para os microserviços corretos
-- **Rate Limiting** - Controle de taxa de requisições por IP/usuário
-- **Autenticação** - Validação de tokens JWT
-- **Load Balancing** - Distribuição de carga entre instâncias
-- **Logging** - Centralização de logs de requisições
-- **CORS** - Configuração de políticas de cross-origin
-
 ### Rotas Configuradas
 
 | Rota Externa        | Serviço          | Rota Interna |
@@ -192,66 +179,6 @@ Os serviços se comunicam através do **RabbitMQ** usando o padrão de mensageri
 | POST   | `/payments`            | Processar pagamento |
 | GET    | `/payments/:id`        | Buscar pagamento    |
 | POST   | `/payments/:id/refund` | Solicitar reembolso |
-
-## 🗃️ Modelos de Dados
-
-### User (Auth Service)
-
-```
-- id: UUID
-- cognitoId: String
-- name: String
-- email: String (único)
-- imageUrl: String?
-- role: HOST | GUEST
-```
-
-### Property (Property Service)
-
-```
-- id: UUID
-- hostId: UUID (ref: User)
-- title: String
-- description: String
-- location: String
-- pricePerNight: Decimal
-- maxGuests: Int
-- images: String[]
-```
-
-### Booking (Booking Service)
-
-```
-- id: UUID
-- propertyId: UUID (ref: Property)
-- guestId: UUID (ref: User)
-- checkIn: Date
-- checkOut: Date
-- totalPrice: Decimal
-- status: PENDING | CONFIRMED | CANCELLED
-```
-
-### Payment (Payment Service)
-
-```
-- id: UUID
-- bookingId: UUID (ref: Booking)
-- amount: Decimal
-- status: PENDING | COMPLETED | FAILED | REFUNDED
-- paymentMethod: String
-```
-
-## 📊 Fluxo de Reserva
-
-```
-1. Usuário busca propriedades (Property Service)
-2. Usuário cria reserva (Booking Service)
-3. Booking Service publica evento "booking.created"
-4. Payment Service recebe evento e aguarda pagamento
-5. Usuário realiza pagamento (Payment Service)
-6. Payment Service publica evento "payment.completed"
-7. Booking Service confirma reserva
-```
 
 ## 📄 Licença
 
