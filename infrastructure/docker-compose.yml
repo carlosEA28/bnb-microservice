@@ -1,0 +1,14 @@
+services:
+  krakend:
+    image: devopsfaith/krakend:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./krakend-gateway:/etc/krakend
+    command: ["run", "-dc", "/etc/krakend/krakend.json"]
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    external: true
