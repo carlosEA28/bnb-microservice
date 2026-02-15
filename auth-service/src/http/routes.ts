@@ -14,3 +14,6 @@ Approutes.delete("/users/:id", deleteUser);
 // Sessions (login / logout)
 Approutes.post("/sessions", login);
 Approutes.delete("/sessions", logout);
+Approutes.get("/users/test", (req, res) => {
+  res.send("Hello World");
+});
