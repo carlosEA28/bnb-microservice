@@ -28,7 +28,7 @@ model PropertyImage {
   url         String
   created_at  DateTime @default(now())
 
-  property Property @relation(fields: [property_id], references: [id])
+  property Property @relation(fields: [property_id], references: [id], onDelete: Cascade)
 }
 
 model Amenity {
@@ -42,8 +42,8 @@ model PropertyAmenity {
   property_id String
   amenity_id  String
 
-  property Property @relation(fields: [property_id], references: [id])
-  amenity  Amenity  @relation(fields: [amenity_id], references: [id])
+  property Property @relation(fields: [property_id], references: [id], onDelete: Cascade)
+  amenity  Amenity  @relation(fields: [amenity_id], references: [id], onDelete: Cascade)
 
   @@id([property_id, amenity_id])
 }
