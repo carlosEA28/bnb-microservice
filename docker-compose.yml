@@ -1,0 +1,17 @@
+services:
+  api-gateway:
+    image: kong:latest
+    environment:
+      KONG_DATABASE: "off"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+      KONG_ADMIN_GUI_URL: "http://localhost:8002"
+      KONG_DECLARATIVE_CONFIG: "/kong/config.yml"
+    extra_hosts:
+      - "host.docker.internal:host-gateway" #faz o docker ver o meu localhost como host.docker.internal(para dev)
+    volumes:
+      - ./infra/docker/kong/config.yml:/kong/config.yml
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+      - "8444:8444"

@@ -12,8 +12,8 @@ Approutes.post("/users", upload.single("image"), createUser);
 Approutes.delete("/users/:id", deleteUser);
 
 // Sessions (login / logout)
-Approutes.post("/sessions", login);
-Approutes.delete("/sessions", logout);
+Approutes.post("/users/sessions", login);
+Approutes.delete("/users/sessions", logout);
 Approutes.get("/users/test", (req, res) => {
   res.send("Hello World");
 });
