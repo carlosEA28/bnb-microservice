@@ -10,13 +10,13 @@ export interface PropertyRepository {
   updatePropertyAvailability(id: string, availability: boolean): Promise<any>;
 
   // publico
-  listProperties(filter: any): Promise<any[]>;
-  searchPropertiesByCity(city: string): Promise<any[]>;
-  searchPropertiesByCountry(country: string): Promise<any[]>;
+  searchPropertiesByCity(city: string): Promise<Property[]>;
+  searchPropertiesByCountry(country: string): Promise<Property[]>;
   searchPropertiesByPriceRange(
     minPrice: number,
     maxPrice: number,
   ): Promise<any[]>;
-  getPropertyById(id: string): Promise<any>;
+  getPropertyById(id: string): Promise<Property>;
   getAllProperties(): Promise<Property[]>;
+  getAllAvailablePropeties(): Promise<Property[]>;
 }

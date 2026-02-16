@@ -59,28 +59,7 @@ export class PrismaPropertyRepository implements PropertyRepository {
     });
   }
 
-  updatePropertyPrice(id: string, price: number): Promise<any> {
-    throw new Error("Method not implemented.");
-  }
-  updatePropertyAvailability(id: string, availability: boolean): Promise<any> {
-    throw new Error("Method not implemented.");
-  }
-  listProperties(filter: any): Promise<any[]> {
-    throw new Error("Method not implemented.");
-  }
-  searchPropertiesByCity(city: string): Promise<any[]> {
-    throw new Error("Method not implemented.");
-  }
-  searchPropertiesByCountry(country: string): Promise<any[]> {
-    throw new Error("Method not implemented.");
-  }
-  searchPropertiesByPriceRange(
-    minPrice: number,
-    maxPrice: number,
-  ): Promise<any[]> {
-    throw new Error("Method not implemented.");
-  }
-  async getPropertyById(id: string) {
+  async getPropertyById(id: string): Promise<Property> {
     const property = await prisma.property.findUnique({
       where: { id },
       include: {
@@ -88,6 +67,56 @@ export class PrismaPropertyRepository implements PropertyRepository {
       },
     });
 
-    return property;
+    return property!;
+  }
+
+  updatePropertyPrice(id: string, price: number): Promise<any> {
+    throw new Error("Method not implemented.");
+  }
+
+  updatePropertyAvailability(id: string, availability: boolean): Promise<any> {
+    throw new Error("Method not implemented.");
+  }
+
+  async searchPropertiesByCity(city: string): Promise<Property[]> {
+    const properties = await prisma.property.findMany({
+      where: {
+        city: {
+          equals: city,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    return properties;
+  }
+
+  async searchPropertiesByCountry(country: string): Promise<Property[]> {
+    const properties = await prisma.property.findMany({
+      where: {
+        country: {
+          equals: country,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    return properties;
+  }
+
+  async getAllAvailablePropeties(): Promise<Property[]> {
+    const properties = await prisma.property.findMany({
+      where: {
+        isActive: true,
+      },
+    });
+
+    return properties;
+  }
+  searchPropertiesByPriceRange(
+    minPrice: number,
+    maxPrice: number,
+  ): Promise<any[]> {
+    throw new Error("Method not implemented.");
   }
 }
