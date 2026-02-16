@@ -77,7 +77,14 @@ export class PrismaPropertyRepository implements PropertyRepository {
   ): Promise<any[]> {
     throw new Error("Method not implemented.");
   }
-  getPropertyById(id: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  async getPropertyById(id: string) {
+    const property = await prisma.property.findUnique({
+      where: { id },
+      include: {
+        propertyImages: true,
+      },
+    });
+
+    return property;
   }
 }
