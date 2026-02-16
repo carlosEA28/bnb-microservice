@@ -4,6 +4,9 @@ import { PropertyRepository } from "../property-repository";
 import { CreatePropertyData } from "../../dtos/createPropertyDto";
 
 export class PrismaPropertyRepository implements PropertyRepository {
+  async getAllProperties(): Promise<Property[]> {
+    return await prisma.property.findMany();
+  }
   async createProperty(data: CreatePropertyData): Promise<Property> {
     const { id, propertyImages, amenities, ...propertyData } = data;
 

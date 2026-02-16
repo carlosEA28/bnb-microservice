@@ -1,4 +1,5 @@
 import { CreatePropertyData } from "../dtos/createPropertyDto";
+import { Property } from "../generated/prisma/client";
 
 export interface PropertyRepository {
   // autenticado
@@ -17,4 +18,5 @@ export interface PropertyRepository {
     maxPrice: number,
   ): Promise<any[]>;
   getPropertyById(id: string): Promise<any>;
+  getAllProperties(): Promise<Property[]>;
 }
