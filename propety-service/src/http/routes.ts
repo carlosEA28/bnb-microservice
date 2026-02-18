@@ -6,6 +6,9 @@ import { getAllProperties } from "./controller/getAllProperties";
 import { getAllAvailableProperties } from "./controller/getAllAvailableProperties";
 import { searchPropertiesByCity } from "./controller/searchPropertiesByCity";
 import { searchPropertiesByCountry } from "./controller/searchPropertiesByCountry";
+import { searchPropertiesByPriceRange } from "./controller/searchPropertiesByPriceRange";
+import { editProperty } from "./controller/editProperty";
+import { updatePropertyPrice } from "./controller/updatePropertyPrice";
 
 export const Approutes = Router();
 
@@ -19,4 +22,7 @@ Approutes.get("/properties", getAllProperties);
 Approutes.get("/properties/available", getAllAvailableProperties);
 Approutes.get("/properties/search/city", searchPropertiesByCity);
 Approutes.get("/properties/search/country", searchPropertiesByCountry);
+Approutes.get("/properties/search/price", searchPropertiesByPriceRange);
+Approutes.put("/properties/:id", editProperty);
+Approutes.patch("/properties/:id/price", updatePropertyPrice);
 Approutes.delete("/properties/:id", deleteProperty);

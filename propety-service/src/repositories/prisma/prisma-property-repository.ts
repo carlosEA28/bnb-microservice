@@ -2,6 +2,7 @@ import { Property } from "../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { PropertyRepository } from "../property-repository";
 import { CreatePropertyData } from "../../dtos/createPropertyDto";
+import { EditPropertyParams } from "../../dtos/editPropertyDto";
 
 export class PrismaPropertyRepository implements PropertyRepository {
   async getAllProperties(): Promise<Property[]> {
@@ -39,8 +40,22 @@ export class PrismaPropertyRepository implements PropertyRepository {
     });
   }
 
-  editProperty(id: string, property: any): Promise<any> {
-    throw new Error("Method not implemented.");
+  async editProperty(
+    id: string,
+    property: EditPropertyParams,
+  ): Promise<Property> {
+    const updatedProperty = await prisma.property.update({
+      where: { id },
+      data: property,
+      include: {
+        propertyImages: true,
+        propertyAmenities: {
+          include: { amenity: true },
+        },
+      },
+    });
+
+    return updatedProperty;
   }
 
   async deleteProperty(id: string): Promise<void> {
@@ -70,8 +85,15 @@ export class PrismaPropertyRepository implements PropertyRepository {
     return property!;
   }
 
-  updatePropertyPrice(id: string, price: number): Promise<any> {
-    throw new Error("Method not implemented.");
+  async updatePropertyPrice(id: string, price: number): Promise<Property> {
+    const updatedProperty = await prisma.property.update({
+      where: { id },
+      data: {
+        price_per_night: price,
+      },
+    });
+
+    return updatedProperty;
   }
 
   updatePropertyAvailability(id: string, availability: boolean): Promise<any> {
@@ -113,10 +135,19 @@ export class PrismaPropertyRepository implements PropertyRepository {
 
     return properties;
   }
-  searchPropertiesByPriceRange(
+  async searchPropertiesByPriceRange(
     minPrice: number,
     maxPrice: number,
-  ): Promise<any[]> {
-    throw new Error("Method not implemented.");
+  ): Promise<Property[]> {
+    const properties = await prisma.property.findMany({
+      where: {
+        price_per_night: {
+          gte: minPrice,
+          lte: maxPrice,
+        },
+      },
+    });
+
+    return properties;
   }
 }
