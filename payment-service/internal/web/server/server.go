@@ -18,7 +18,6 @@ func NewServer(port string) *Server {
 		port:   port,
 	}
 }
-
 func (s *Server) Start() error {
 	s.server = &http.Server{
 		Addr:    ":" + s.port,

@@ -1,0 +1,21 @@
+services:
+  db:
+    image: bitnami/postgresql
+    container_name: airbnb_payment_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payment_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - payment_postgres_data:/bitnami/postgresql
+    networks:
+      - microservices-network
+
+volumes:
+  payment_postgres_data:
+
+networks:
+  microservices-network:
+    external: true
