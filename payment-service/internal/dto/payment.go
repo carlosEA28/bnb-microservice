@@ -7,18 +7,22 @@ import (
 )
 
 type CreatePaymentDto struct {
-	BookingID     string  `json:"booking_id"`
-	UserID        string  `json:"user_id"`
-	Amount        float64 `json:"amount"`
-	Currency      string  `json:"currency"`
-	PaymentMethod string  `json:"payment_method"`
+	BookingID     string
+	UserID        string
+	Amount        int64  // em centavos!
+	Currency      string // "brl"
+	PaymentMethod string
 }
-
+type CreatePaymentDto3 struct {
+	BookingID string
+	UserID    string
+	Amount    int64 // em centavos
+}
 type PaymentResponseDto struct {
 	ID                string    `json:"id"`
 	BookingID         string    `json:"booking_id"`
 	UserID            string    `json:"user_id"`
-	Amount            float64   `json:"amount"`
+	Amount            int64     `json:"amount"`
 	Currency          string    `json:"currency"`
 	PaymentMethod     string    `json:"payment_method"`
 	ProviderPaymentID string    `json:"provider_payment_id,omitempty"`

@@ -6,7 +6,7 @@ type Payment struct {
 	Id                string
 	BookingID         string
 	UserID            string
-	Amount            float64
+	Amount            int64
 	Currency          string
 	PaymentMethod     string
 	ProviderPaymentID string
