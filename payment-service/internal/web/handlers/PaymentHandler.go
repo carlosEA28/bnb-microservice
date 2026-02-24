@@ -27,12 +27,15 @@ func (h *PaymentHandler) CreatePayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 2️⃣ Chamar UseCase
-	err := h.paymentService.CreatePayment(input)
+	url, err := h.paymentService.CreatePayment(input)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// 3️⃣ Responder sucesso
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(url)
+
 }

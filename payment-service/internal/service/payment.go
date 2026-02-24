@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/carlosEA28/payment-service/internal/domain"
@@ -22,15 +21,15 @@ func NewPaymentUseCase(paymentRepository repository.PaymentRepository) *PaymentU
 	return &PaymentUseCase{paymentRepository: paymentRepository}
 }
 
-func (s *PaymentUseCase) CreatePayment(input dto.CreatePaymentDto) error {
+func (s *PaymentUseCase) CreatePayment(input dto.CreatePaymentDto) (string, error) {
 
 	if input.BookingID == "" || input.UserID == "" {
-		return errors.New("booking_id e user_id são obrigatórios")
+		return "", errors.New("booking_id e user_id são obrigatórios")
 	}
 
 	cfg, err := config.New(os.Getenv("MERCADO_PAGO_ACCESS_TOKEN"))
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	client := preference.NewClient(cfg)
@@ -49,7 +48,7 @@ func (s *PaymentUseCase) CreatePayment(input dto.CreatePaymentDto) error {
 
 	response, err := client.Create(context.Background(), request)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	payment := &domain.Payment{
@@ -61,9 +60,13 @@ func (s *PaymentUseCase) CreatePayment(input dto.CreatePaymentDto) error {
 		PaymentMethod:     "CREDIT_CARD",
 		ProviderPaymentID: response.ID,
 		ExternalReference: input.BookingID,
+		Status:            "PENDING",
 	}
 
-	fmt.Println(response.InitPoint)
+	err = s.paymentRepository.CreatePayment(payment)
+	if err != nil {
+		return "", err
+	}
 
-	return s.paymentRepository.CreatePayment(payment)
+	return response.InitPoint, nil
 }
