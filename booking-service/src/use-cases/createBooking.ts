@@ -6,9 +6,13 @@ import {
   validateBookingDates,
 } from "../helpers";
 import { PropertyNotAvailableError, InvalidBookingDatesError } from "./errors";
+import { EventPublisher } from "../lib/rabbitmq/eventPublisher";
 
 export class CreateBookingUseCase {
-  constructor(private bookingRepository: BookingRepository) {}
+  constructor(
+    private bookingRepository: BookingRepository,
+    private eventPublisher: EventPublisher,
+  ) {}
 
   async execute(params: unknown) {
     const validatedParams = CreateBookingParamsSchema.parse(params);
@@ -48,6 +52,12 @@ export class CreateBookingUseCase {
       checkIn,
       checkOut,
       totalPrice,
+    });
+
+    await this.eventPublisher.PublishBookingCreated("booking.created", {
+      bookingId: booking.id,
+      userId: booking.guestId,
+      Amount: booking.totalPrice,
     });
 
     return booking;

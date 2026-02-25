@@ -10,7 +10,7 @@ export async function createBooking(req: Request, res: Response) {
   const guestId = (req.headers["x-user-id"] as string) || req.body.guestId;
 
   try {
-    const createBookingUseCase = makeCreateBookingUseCase();
+    const createBookingUseCase = await makeCreateBookingUseCase();
 
     const booking = await createBookingUseCase.execute({
       ...req.body,

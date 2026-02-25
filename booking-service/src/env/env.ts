@@ -4,6 +4,7 @@ import "dotenv/config";
 const envSchema = z.object({
   DATABASE_URL: z.string(),
   PORT: z.string().default("3002"),
+  RABBITMQ_URL: z.string().default("amqp://localhost:5672"),
 });
 
 const _env = envSchema.safeParse(process.env);
