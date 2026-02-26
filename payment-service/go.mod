@@ -9,4 +9,7 @@ require (
 	github.com/mercadopago/sdk-go v1.8.0
 )
 
-require github.com/google/uuid v1.5.0 // indirect
+require (
+	github.com/google/uuid v1.5.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.10.0 // indirect
+)

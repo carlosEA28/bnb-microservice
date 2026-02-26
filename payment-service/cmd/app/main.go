@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/carlosEA28/payment-service/internal/domain/delivery"
 	"github.com/carlosEA28/payment-service/internal/repository"
 	"github.com/carlosEA28/payment-service/internal/service"
 	"github.com/carlosEA28/payment-service/internal/web/server"
@@ -51,6 +52,33 @@ func main() {
 	paymentRepository := repository.NewPaymentRepository(db)
 	paymentUseCase := service.NewPaymentUseCase(paymentRepository)
 
+	rabbitURL := getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
+
+	// Cria o publisher para enviar eventos
+	publisher, err := service.NewPublisher(rabbitURL)
+	if err != nil {
+		log.Fatal("Error creating RabbitMQ publisher: ", err)
+	}
+	defer publisher.Close()
+
+	handler := delivery.NewPaymentHandler(paymentUseCase, publisher)
+
+	consumer, err := service.NewConsumer(
+		rabbitURL,
+		"booking.created",
+		handler,
+	)
+
+	if err != nil {
+		log.Fatal("Error creating RabbitMQ consumer: ", err)
+	}
+
+	defer consumer.Close()
+
+	if err := consumer.StartConsumer(); err != nil {
+		log.Fatal("Error starting RabbitMQ consumer: ", err)
+	}
+
 	port := getEnv("HTTP_PORT", "3003")
 	srv := server.NewServer(paymentUseCase, port)
 	srv.ConfigureRoutes()
@@ -58,4 +86,7 @@ func main() {
 	if err := srv.Start(); err != nil {
 		log.Fatal("Error starting server: ", err)
 	}
+
+	select {} // Keep the main function running
+
 }
