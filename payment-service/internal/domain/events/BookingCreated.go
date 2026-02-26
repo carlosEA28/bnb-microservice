@@ -1,9 +1,9 @@
 package events
 
 type BookingCreated struct {
-	BookingID string
-	UserID    string
-	Amount    int64 `json:"amount"`
+	BookingID string `json:"bookingId"`
+	UserID    string `json:"userId"`
+	Amount    int64  `json:"Amount"`
 }
 
 func NewBookingCreated(bookingID, userID string, amount int64) *BookingCreated {

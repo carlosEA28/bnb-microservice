@@ -84,6 +84,16 @@ export class PrismaBookingRepository implements BookingRepository {
     });
   }
 
+  async updatePaymentUrl(
+    bookingId: string,
+    paymentUrl: string,
+  ): Promise<Booking> {
+    return await prisma.booking.update({
+      where: { id: bookingId },
+      data: { paymentUrl },
+    });
+  }
+
   async getAllBookings(): Promise<Booking[]> {
     return await prisma.booking.findMany({
       orderBy: { createdAt: "desc" },

@@ -16,6 +16,7 @@ model Booking {
   totalPrice   Float
   status       BookingStatus       @default(PENDING)
   availability BookingAvailability @default(AVAILABLE)
+  paymentUrl   String?
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
 

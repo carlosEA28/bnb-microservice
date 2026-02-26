@@ -10,5 +10,6 @@ export interface BookingRepository {
   getBookingsByProperty(propertyId: string): Promise<Booking[]>;
   getActiveBookingsByProperty(propertyId: string): Promise<Booking[]>;
   updateBookingStatus(id: string, status: BookingStatus): Promise<Booking>;
+  updatePaymentUrl(bookingId: string, paymentUrl: string): Promise<Booking>;
   getAllBookings(): Promise<Booking[]>;
 }
