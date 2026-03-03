@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  webhooks-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
