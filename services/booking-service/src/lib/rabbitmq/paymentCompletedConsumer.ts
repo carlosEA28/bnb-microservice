@@ -11,8 +11,6 @@ export class PaymentCompletedConsumer {
 
     await channel.assertQueue(queue, { durable: true });
 
-    console.log(` Waiting for messages in ${queue}`);
-
     channel.consume(
       queue,
       async (msg) => {
@@ -23,20 +21,12 @@ export class PaymentCompletedConsumer {
             msg.content.toString(),
           );
 
-          console.log(
-            ` Received payment.completed for booking ${event.bookingId}`,
-          );
-
           await this.bookingRepository.confirmBooking(event.bookingId);
-          console.log(` Booking ${event.bookingId} confirmed`);
 
           channel.ack(msg);
         } catch (error: unknown) {
-          console.error("Error processing payment.completed:", error);
-
           const prismaError = error as { code?: string };
           if (prismaError.code === "P2025") {
-            console.warn(`[!] Booking not found, discarding message`);
             channel.ack(msg);
           } else {
             channel.nack(msg, false, true);

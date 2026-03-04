@@ -7,17 +7,13 @@ import { PrismaBookingRepository } from "./repositories/prisma/prisma-booking-re
 async function bootstrap() {
   const bookingRepository = new PrismaBookingRepository();
 
-  // Inicia o consumer de payment.created
   const paymentCreatedConsumer = new PaymentCreatedConsumer(bookingRepository);
   await paymentCreatedConsumer.start();
-  console.log("PaymentCreated consumer started");
 
-  // Inicia o consumer de payment.completed
   const paymentCompletedConsumer = new PaymentCompletedConsumer(
     bookingRepository,
   );
   await paymentCompletedConsumer.start();
-  console.log("PaymentCompleted consumer started");
 
   app.listen(env.PORT, () => {
     console.log(`Booking service is running on port ${env.PORT}`);
