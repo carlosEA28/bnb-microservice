@@ -49,7 +49,7 @@ Sistema de aluguel de imóveis construído com arquitetura de microserviços.
 - **Kong** - API Gateway com JWT
 - **AWS Cognito** - Autenticação
 - **AWS S3** - Storage de imagens
-- **Stripe** - Pagamentos
+- **Mercado Pago** - Pagamentos
 
 ## Endpoints
 
