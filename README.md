@@ -1,189 +1,128 @@
 # Simple Airbnb
 
-Sistema de aluguel de imóveis simplificado, inspirado no Airbnb, construído com arquitetura de microserviços.
+Sistema de aluguel de imóveis construído com arquitetura de microserviços.
 
-## 🏗️ Arquitetura
-
-```
-                              ┌─────────────┐
-                              │   Client    │
-                              │  (Browser/  │
-                              │   Mobile)   │
-                              └──────┬──────┘
-                                     │
-                              ┌──────┴──────┐
-                              │    Kong     │
-                              │ API Gateway │
-                              │   (:8000)   │
-                              └──────┬──────┘
-                                     │
-       ┌───────────────────┬─────────┴─────────┬───────────────────┐
-       │                   │                   │                   │
-┌──────┴──────┐     ┌──────┴──────┐     ┌──────┴──────┐     ┌──────┴──────┐
-│   Auth      │     │  Property   │     │   Booking   │     │   Payment   │
-│  Service    │     │  Service    │     │   Service   │     │   Service   │
-│  (Node.js)  │     │  (Node.js)  │     │  (Node.js)  │     │    (Go)     │
-│   :3000     │     │   :3001     │     │   :3002     │     │   :3003     │
-└──────┬──────┘     └──────┬──────┘     └──────┬──────┘     └──────┬──────┘
-       │                   │                   │                   │
-       └───────────────────┴─────────┬─────────┴───────────────────┘
-                                     │
-                              ┌──────┴──────┐
-                              │  RabbitMQ   │
-                              │  (Message   │
-                              │   Broker)   │
-                              └─────────────┘
-                                     │
-       ┌───────────────────┬─────────┴─────────┬───────────────────┐
-       │                   │                   │                   │
-┌──────┴──────┐     ┌──────┴──────┐     ┌──────┴──────┐     ┌──────┴──────┐
-│ PostgreSQL  │     │ PostgreSQL  │     │ PostgreSQL  │     │ PostgreSQL  │
-│  (Auth DB)  │     │(Property DB)│     │(Booking DB) │     │(Payment DB) │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-```
-
-## 📦 Microserviços
-
-| Serviço              | Tecnologia        | Descrição                                                      | Porta |
-| -------------------- | ----------------- | -------------------------------------------------------------- | ----- |
-| **Kong Gateway**     | Kong              | API Gateway - ponto de entrada único para todas as requisições | 8000  |
-| **Auth Service**     | Node.js + Express | Autenticação e gerenciamento de usuários via AWS Cognito       | 3000  |
-| **Property Service** | Node.js + Express | Cadastro e busca de propriedades para aluguel                  | 3001  |
-| **Booking Service**  | Node.js + Express | Gerenciamento de reservas                                      | 3002  |
-| **Payment Service**  | Go + Chi          | Processamento de pagamentos                                    | 3003  |
-
-## 🚀 Tech Stack
-
-### Backend
-
-- **Node.js** - Runtime JavaScript para Auth, Property e Booking Services
-- **Go** - Linguagem compilada para Payment Service (alta performance)
-- **Express** - Framework web para Node.js
-- **Chi** - Router HTTP leve e idiomático para Go
-
-### Banco de Dados
-
-- **PostgreSQL** - Banco de dados relacional
-- **Prisma** - ORM para serviços Node.js
-
-### Mensageria
-
-- **RabbitMQ** - Message broker para comunicação assíncrona entre serviços
-
-### API Gateway
-
-- **Kong** - API Gateway para roteamento, rate limiting, autenticação e monitoramento
-
-### Cloud & Infraestrutura
-
-- **Docker** - Containerização
-- **AWS Cognito** - Autenticação de usuários
-- **AWS S3** - Armazenamento de imagens
-
-### Validação
-
-- **Zod** - Validação de schemas em TypeScript
-
-## 📁 Estrutura do Projeto
+## Arquitetura
 
 ```
-simple-airbnb/
-├── auth-service/        # Serviço de autenticação (Node.js)
-├── property-service/    # Serviço de propriedades (Node.js)
-├── booking-service/     # Serviço de reservas (Node.js)
-├── payment-service/     # Serviço de pagamentos (Go)
-├── kong/                # Configuração do Kong API Gateway
-│   └── kong.yml         # Declarative config (services, routes, plugins)
-└── docker-compose.yml   # Orquestração dos containers
+                         ┌──────────────┐
+                         │    Client    │
+                         └──────┬───────┘
+                                │
+                         ┌──────┴───────┐
+                         │     Kong     │
+                         │  (Gateway)   │
+                         │    :8000     │
+                         └──────┬───────┘
+                                │
+       ┌────────────┬───────────┼───────────┬────────────┐
+       │            │           │           │            │
+┌──────┴──────┐ ┌───┴────┐ ┌────┴────┐ ┌────┴────┐ ┌─────┴─────┐
+│    Auth     │ │Property│ │ Booking │ │ Payment │ │ Webhooks  │
+│   :3000     │ │ :3001  │ │  :3002  │ │  :3003  │ │   :3004   │
+└──────┬──────┘ └───┬────┘ └────┬────┘ └────┬────┘ └───────────┘
+       │            │           │           │
+       └────────────┴─────┬─────┴───────────┘
+                          │
+                    ┌─────┴─────┐
+                    │ RabbitMQ  │
+                    └───────────┘
 ```
 
-### Rotas Configuradas
+## Serviços
 
-| Rota Externa        | Serviço          | Rota Interna |
-| ------------------- | ---------------- | ------------ |
-| `/api/auth/*`       | Auth Service     | `/*`         |
-| `/api/properties/*` | Property Service | `/*`         |
-| `/api/bookings/*`   | Booking Service  | `/*`         |
-| `/api/payments/*`   | Payment Service  | `/*`         |
+| Serviço          | Stack             | Porta |
+| ---------------- | ----------------- | ----- |
+| Kong Gateway     | Kong              | 8000  |
+| Auth Service     | Node.js + Express | 3000  |
+| Property Service | Node.js + Express | 3001  |
+| Booking Service  | Node.js + Express | 3002  |
+| Payment Service  | Go + Chi          | 3003  |
+| Webhooks Service | Node.js + Express | 3004  |
 
-### Admin API
+## Tecnologias
 
-O Kong Admin API está disponível na porta `8001` para configuração e monitoramento.
+- **Node.js / Go** - Backend
+- **PostgreSQL** - Banco de dados
+- **Prisma** - ORM (Node.js)
+- **RabbitMQ** - Mensageria
+- **Kong** - API Gateway com JWT
+- **AWS Cognito** - Autenticação
+- **AWS S3** - Storage de imagens
+- **Stripe** - Pagamentos
 
-## ⚙️ Configuração
+## Endpoints
 
-### Pré-requisitos
+### Auth Service (`/users`)
 
-- Docker e Docker Compose
-- Node.js 18+
-- Go 1.21+
-- Conta AWS (Cognito e S3)
+| Método | Rota            | Descrição       |
+| ------ | --------------- | --------------- |
+| POST   | /users          | Criar usuário   |
+| DELETE | /users/:id      | Deletar usuário |
+| POST   | /users/sessions | Login           |
+| DELETE | /users/sessions | Logout          |
 
-### Variáveis de Ambiente
+### Property Service (`/properties`)
 
-Cada serviço possui seu próprio arquivo `.env`. Consulte o README de cada serviço para mais detalhes.
+| Método | Rota                       | Descrição                 |
+| ------ | -------------------------- | ------------------------- |
+| POST   | /properties                | Criar propriedade         |
+| GET    | /properties                | Listar todas              |
+| GET    | /properties/available      | Listar disponíveis        |
+| GET    | /properties/search/city    | Buscar por cidade         |
+| GET    | /properties/search/country | Buscar por país           |
+| GET    | /properties/search/price   | Buscar por faixa de preço |
+| PUT    | /properties/:id            | Editar propriedade        |
+| PATCH  | /properties/:id/price      | Atualizar preço           |
+| DELETE | /properties/:id            | Deletar propriedade       |
 
-## Comunicação entre Serviços
+### Booking Service (`/bookings`)
 
-Os serviços se comunicam através do **RabbitMQ** usando o padrão de mensageria:
+| Método | Rota                           | Descrição              |
+| ------ | ------------------------------ | ---------------------- |
+| POST   | /bookings                      | Criar reserva          |
+| GET    | /bookings                      | Listar todas           |
+| GET    | /bookings/:id                  | Buscar por ID          |
+| GET    | /bookings/guest/:guestId       | Buscar por hóspede     |
+| GET    | /bookings/property/:propertyId | Buscar por propriedade |
+| PATCH  | /bookings/:id/cancel           | Cancelar reserva       |
+| PATCH  | /bookings/:id/confirm          | Confirmar reserva      |
 
-### Eventos Publicados
+### Payment Service (`/payments`)
 
-| Serviço  | Evento              | Descrição                   |
-| -------- | ------------------- | --------------------------- |
-| Auth     | `user.created`      | Novo usuário registrado     |
-| Auth     | `user.deleted`      | Usuário removido            |
-| Property | `property.created`  | Nova propriedade cadastrada |
-| Property | `property.updated`  | Propriedade atualizada      |
-| Booking  | `booking.created`   | Nova reserva criada         |
-| Booking  | `booking.cancelled` | Reserva cancelada           |
-| Payment  | `payment.completed` | Pagamento confirmado        |
-| Payment  | `payment.failed`    | Pagamento falhou            |
+| Método | Rota          | Descrição        |
+| ------ | ------------- | ---------------- |
+| POST   | /payments     | Criar pagamento  |
+| GET    | /payments/:id | Buscar pagamento |
 
-## 🔗 API Endpoints
+### Webhooks Service (`/webhooks`)
 
-> **Nota:** Todas as requisições passam pelo Kong Gateway na porta `8000`. As rotas abaixo mostram os endpoints internos de cada serviço. Via Kong, use o prefixo correspondente (ex: `/api/auth/users` para criar usuário).
+| Método | Rota             | Descrição      |
+| ------ | ---------------- | -------------- |
+| POST   | /webhooks/stripe | Webhook Stripe |
 
-### Auth Service (`:3000` | Kong: `/api/auth`)
+## Executar
 
-| Método | Rota         | Descrição       |
-| ------ | ------------ | --------------- |
-| POST   | `/users`     | Criar usuário   |
-| DELETE | `/users/:id` | Deletar usuário |
-| POST   | `/sessions`  | Login           |
-| DELETE | `/sessions`  | Logout          |
+```bash
+# Subir Kong e RabbitMQ
+docker-compose up -d
 
-### Property Service (`:3001` | Kong: `/api/properties`)
+# Em cada serviço
+cd services/<service-name>
+npm install
+npm run dev
+```
 
-| Método | Rota              | Descrição             |
-| ------ | ----------------- | --------------------- |
-| GET    | `/properties`     | Listar propriedades   |
-| GET    | `/properties/:id` | Buscar propriedade    |
-| POST   | `/properties`     | Criar propriedade     |
-| PUT    | `/properties/:id` | Atualizar propriedade |
-| DELETE | `/properties/:id` | Deletar propriedade   |
+## Variáveis de Ambiente
 
-### Booking Service (`:3002` | Kong: `/api/bookings`)
+Exemplo `.env` para auth-service:
 
-| Método | Rota                   | Descrição        |
-| ------ | ---------------------- | ---------------- |
-| GET    | `/bookings`            | Listar reservas  |
-| GET    | `/bookings/:id`        | Buscar reserva   |
-| POST   | `/bookings`            | Criar reserva    |
-| PATCH  | `/bookings/:id/cancel` | Cancelar reserva |
-
-### Payment Service (`:3003` | Kong: `/api/payments`)
-
-| Método | Rota                   | Descrição           |
-| ------ | ---------------------- | ------------------- |
-| POST   | `/payments`            | Processar pagamento |
-| GET    | `/payments/:id`        | Buscar pagamento    |
-| POST   | `/payments/:id/refund` | Solicitar reembolso |
-
-## 📄 Licença
-
-ISC
-
----
-
-Desenvolvido com ❤️ como projeto de estudo de arquitetura de microserviços.
+```env
+DATABASE_URL=
+AWS_REGION=
+COGNITO_USER_POOL_ID=
+COGNITO_CLIENT_ID=
+COGNITO_SECRET=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+```
