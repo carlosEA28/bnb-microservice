@@ -1,0 +1,14 @@
+# Environment files with secrets
+infra/docker/kong/.env
+*.env.local
+
+# IDE
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+.env
+infra/docker/kong/config.yml
