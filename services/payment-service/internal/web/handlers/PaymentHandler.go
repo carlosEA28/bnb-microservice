@@ -20,20 +20,17 @@ func (h *PaymentHandler) CreatePayment(w http.ResponseWriter, r *http.Request) {
 
 	var input dto.CreatePaymentDto
 
-	// 1️⃣ Decodificar JSON
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// 2️⃣ Chamar UseCase
 	url, err := h.paymentService.CreatePayment(input)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// 3️⃣ Responder sucesso
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(url)
