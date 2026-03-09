@@ -1,0 +1,1075 @@
+openapi: 3.1.0
+info:
+  title: Simple Airbnb API
+  description: |
+    Sistema de aluguel de imóveis construído com arquitetura de microserviços.
+
+    ## Arquitetura
+
+    O sistema é composto por 5 microserviços principais:
+    - **Auth Service** - Autenticação e gerenciamento de usuários (AWS Cognito)
+    - **Property Service** - Gerenciamento de propriedades
+    - **Booking Service** - Gerenciamento de reservas
+    - **Payment Service** - Processamento de pagamentos (Mercado Pago)
+    - **Webhooks Service** - Processamento de webhooks de pagamento
+
+    ## Tecnologias
+    - Node.js / Go - Backend
+    - PostgreSQL - Banco de dados
+    - Prisma - ORM
+    - RabbitMQ - Mensageria
+    - Kong - API Gateway
+    - AWS S3 - Storage de imagens
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: ISC
+
+servers:
+  - url: http://localhost:8000
+    description: Kong API Gateway
+  - url: http://localhost:3000
+    description: Auth Service (direto)
+  - url: http://localhost:3001
+    description: Property Service (direto)
+  - url: http://localhost:3002
+    description: Booking Service (direto)
+  - url: http://localhost:3003
+    description: Payment Service (direto)
+  - url: http://localhost:3004
+    description: Webhooks Service (direto)
+
+tags:
+  - name: Auth
+    description: Autenticação e gerenciamento de usuários
+  - name: Properties
+    description: Gerenciamento de propriedades para aluguel
+  - name: Bookings
+    description: Gerenciamento de reservas
+  - name: Payments
+    description: Processamento de pagamentos
+  - name: Webhooks
+    description: Processamento de webhooks externos
+
+paths:
+  # ==================== AUTH SERVICE ====================
+  /users:
+    post:
+      tags:
+        - Auth
+      summary: Criar usuário
+      description: Cria um novo usuário no sistema com autenticação via AWS Cognito
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  description: Nome completo do usuário
+                  example: João Silva
+                email:
+                  type: string
+                  format: email
+                  description: Email válido do usuário
+                  example: joao@email.com
+                password:
+                  type: string
+                  format: password
+                  description: |
+                    Senha do usuário. Deve conter:
+                    - Mínimo 8 caracteres
+                    - Pelo menos 1 número
+                    - Pelo menos 1 caractere especial
+                    - Pelo menos 1 letra maiúscula
+                    - Pelo menos 1 letra minúscula
+                  example: Senha@123
+                image:
+                  type: string
+                  format: binary
+                  description: Imagem de perfil do usuário (upload para S3)
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "409":
+          description: Email já existe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /users/{id}:
+    delete:
+      tags:
+        - Auth
+      summary: Deletar usuário
+      description: Remove um usuário do sistema
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do usuário
+      responses:
+        "204":
+          description: Usuário deletado com sucesso
+        "404":
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /users/sessions:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      description: Autentica o usuário e retorna tokens JWT
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: joao@email.com
+                password:
+                  type: string
+                  format: password
+                  example: Senha@123
+      responses:
+        "200":
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - Auth
+      summary: Logout
+      description: Encerra a sessão do usuário
+      operationId: logout
+      responses:
+        "204":
+          description: Logout realizado com sucesso
+        "401":
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ==================== PROPERTY SERVICE ====================
+  /properties:
+    post:
+      tags:
+        - Properties
+      summary: Criar propriedade
+      description: Cadastra uma nova propriedade para aluguel
+      operationId: createProperty
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+                - city
+                - country
+                - amenities
+                - price_per_night
+                - max_guests
+                - hostId
+              properties:
+                title:
+                  type: string
+                  description: Título da propriedade
+                  example: Apartamento luxuoso no centro
+                description:
+                  type: string
+                  description: Descrição detalhada
+                  example: Apartamento com 2 quartos, vista para o mar
+                city:
+                  type: string
+                  description: Cidade da propriedade
+                  example: São Paulo
+                country:
+                  type: string
+                  description: País da propriedade
+                  example: Brasil
+                amenities:
+                  type: array
+                  items:
+                    type: string
+                  description: Lista de comodidades
+                  example: ["WiFi", "Piscina", "Estacionamento"]
+                price_per_night:
+                  type: number
+                  format: float
+                  description: Preço por noite em reais
+                  example: 250.00
+                max_guests:
+                  type: integer
+                  description: Número máximo de hóspedes
+                  example: 4
+                hostId:
+                  type: string
+                  format: uuid
+                  description: ID do proprietário
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Imagens da propriedade (máx 10)
+      responses:
+        "201":
+          description: Propriedade criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Property"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+    get:
+      tags:
+        - Properties
+      summary: Listar todas as propriedades
+      description: Retorna a lista de todas as propriedades cadastradas
+      operationId: getAllProperties
+      responses:
+        "200":
+          description: Lista de propriedades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  /properties/available:
+    get:
+      tags:
+        - Properties
+      summary: Listar propriedades disponíveis
+      description: Retorna apenas as propriedades ativas e disponíveis para reserva
+      operationId: getAvailableProperties
+      responses:
+        "200":
+          description: Lista de propriedades disponíveis
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  /properties/search/city:
+    get:
+      tags:
+        - Properties
+      summary: Buscar por cidade
+      description: Busca propriedades em uma cidade específica
+      operationId: searchByCity
+      parameters:
+        - name: city
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Nome da cidade
+          example: São Paulo
+      responses:
+        "200":
+          description: Propriedades encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  /properties/search/country:
+    get:
+      tags:
+        - Properties
+      summary: Buscar por país
+      description: Busca propriedades em um país específico
+      operationId: searchByCountry
+      parameters:
+        - name: country
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Nome do país
+          example: Brasil
+      responses:
+        "200":
+          description: Propriedades encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  /properties/search/price:
+    get:
+      tags:
+        - Properties
+      summary: Buscar por faixa de preço
+      description: Busca propriedades dentro de uma faixa de preço
+      operationId: searchByPriceRange
+      parameters:
+        - name: minPrice
+          in: query
+          required: true
+          schema:
+            type: number
+          description: Preço mínimo por noite
+          example: 100
+        - name: maxPrice
+          in: query
+          required: true
+          schema:
+            type: number
+          description: Preço máximo por noite
+          example: 500
+      responses:
+        "200":
+          description: Propriedades encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  /properties/{id}:
+    put:
+      tags:
+        - Properties
+      summary: Editar propriedade
+      description: Atualiza os dados de uma propriedade
+      operationId: editProperty
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID da propriedade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProperty"
+      responses:
+        "200":
+          description: Propriedade atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Property"
+        "404":
+          description: Propriedade não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - Properties
+      summary: Deletar propriedade
+      description: Remove uma propriedade do sistema
+      operationId: deleteProperty
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID da propriedade
+      responses:
+        "204":
+          description: Propriedade deletada com sucesso
+        "404":
+          description: Propriedade não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /properties/{id}/price:
+    patch:
+      tags:
+        - Properties
+      summary: Atualizar preço
+      description: Atualiza apenas o preço por noite de uma propriedade
+      operationId: updatePropertyPrice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID da propriedade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - price_per_night
+              properties:
+                price_per_night:
+                  type: number
+                  format: float
+                  example: 300.00
+      responses:
+        "200":
+          description: Preço atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Property"
+        "404":
+          description: Propriedade não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ==================== BOOKING SERVICE ====================
+  /bookings:
+    post:
+      tags:
+        - Bookings
+      summary: Criar reserva
+      description: Cria uma nova reserva para uma propriedade
+      operationId: createBooking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - propertyId
+                - guestId
+                - checkIn
+                - checkOut
+                - pricePerNight
+              properties:
+                propertyId:
+                  type: string
+                  format: uuid
+                  description: ID da propriedade
+                guestId:
+                  type: string
+                  format: uuid
+                  description: ID do hóspede
+                checkIn:
+                  type: string
+                  format: date
+                  description: Data de check-in
+                  example: "2026-03-15"
+                checkOut:
+                  type: string
+                  format: date
+                  description: Data de check-out
+                  example: "2026-03-20"
+                pricePerNight:
+                  type: number
+                  format: float
+                  description: Preço por noite
+                  example: 250.00
+      responses:
+        "201":
+          description: Reserva criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "400":
+          description: Dados inválidos ou propriedade indisponível
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      tags:
+        - Bookings
+      summary: Listar todas as reservas
+      description: Retorna a lista de todas as reservas
+      operationId: getAllBookings
+      responses:
+        "200":
+          description: Lista de reservas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+
+  /bookings/{id}:
+    get:
+      tags:
+        - Bookings
+      summary: Buscar reserva por ID
+      description: Retorna os detalhes de uma reserva específica
+      operationId: getBookingById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID da reserva
+      responses:
+        "200":
+          description: Detalhes da reserva
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "404":
+          description: Reserva não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /bookings/guest/{guestId}:
+    get:
+      tags:
+        - Bookings
+      summary: Buscar reservas por hóspede
+      description: Retorna todas as reservas de um hóspede específico
+      operationId: getBookingsByGuest
+      parameters:
+        - name: guestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do hóspede
+      responses:
+        "200":
+          description: Lista de reservas do hóspede
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+
+  /bookings/property/{propertyId}:
+    get:
+      tags:
+        - Bookings
+      summary: Buscar reservas por propriedade
+      description: Retorna todas as reservas de uma propriedade específica
+      operationId: getBookingsByProperty
+      parameters:
+        - name: propertyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID da propriedade
+      responses:
+        "200":
+          description: Lista de reservas da propriedade
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+
+  /bookings/{id}/cancel:
+    patch:
+      tags:
+        - Bookings
+      summary: Cancelar reserva
+      description: Cancela uma reserva existente
+      operationId: cancelBooking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID da reserva
+      responses:
+        "200":
+          description: Reserva cancelada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "404":
+          description: Reserva não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "400":
+          description: Reserva já está cancelada ou confirmada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /bookings/{id}/confirm:
+    patch:
+      tags:
+        - Bookings
+      summary: Confirmar reserva
+      description: Confirma uma reserva pendente após pagamento
+      operationId: confirmBooking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID da reserva
+      responses:
+        "200":
+          description: Reserva confirmada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "404":
+          description: Reserva não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ==================== PAYMENT SERVICE ====================
+  /payment:
+    post:
+      tags:
+        - Payments
+      summary: Criar pagamento
+      description: |
+        Cria um novo pagamento via Mercado Pago.
+        Retorna uma URL de pagamento para o usuário.
+      operationId: createPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - booking_id
+                - user_id
+                - amount
+              properties:
+                booking_id:
+                  type: string
+                  description: ID da reserva
+                user_id:
+                  type: string
+                  description: ID do usuário
+                amount:
+                  type: integer
+                  description: Valor em centavos
+                  example: 125000
+                currency:
+                  type: string
+                  description: Moeda (padrão BRL)
+                  default: brl
+                  example: brl
+                payment_method:
+                  type: string
+                  description: Método de pagamento
+                  example: pix
+      responses:
+        "201":
+          description: Pagamento criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ==================== WEBHOOKS SERVICE ====================
+  /webhooks/mercadopago:
+    post:
+      tags:
+        - Webhooks
+      summary: Webhook Mercado Pago
+      description: |
+        Endpoint para receber notificações de pagamento do Mercado Pago.
+        Usado para atualizar o status de reservas após pagamento.
+      operationId: processMercadoPagoWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  description: Tipo de ação
+                  example: payment.created
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: ID do pagamento no Mercado Pago
+      responses:
+        "200":
+          description: Webhook processado com sucesso
+        "400":
+          description: Payload inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ==================== HEALTH CHECKS ====================
+  /health:
+    get:
+      tags:
+        - Properties
+      summary: Health Check - Property Service
+      description: Verifica se o serviço de propriedades está funcionando
+      operationId: propertyHealthCheck
+      responses:
+        "200":
+          description: Serviço funcionando
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheck"
+
+  /bookings/health:
+    get:
+      tags:
+        - Bookings
+      summary: Health Check - Booking Service
+      description: Verifica se o serviço de reservas está funcionando
+      operationId: bookingHealthCheck
+      responses:
+        "200":
+          description: Serviço funcionando
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheck"
+
+  /webhooks/health:
+    get:
+      tags:
+        - Webhooks
+      summary: Health Check - Webhooks Service
+      description: Verifica se o serviço de webhooks está funcionando
+      operationId: webhooksHealthCheck
+      responses:
+        "200":
+          description: Serviço funcionando
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheck"
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        imageUrl:
+          type: string
+          format: uri
+        cognitoId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: JWT refresh token
+        expiresIn:
+          type: integer
+          description: Tempo de expiração em segundos
+        user:
+          $ref: "#/components/schemas/User"
+
+    Property:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        host_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        isActive:
+          type: boolean
+        price_per_night:
+          type: number
+          format: float
+        max_guests:
+          type: integer
+        propertyImages:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              url:
+                type: string
+                format: uri
+        propertyAmenities:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+        created_at:
+          type: string
+          format: date-time
+
+    UpdateProperty:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        isActive:
+          type: boolean
+        price_per_night:
+          type: number
+          format: float
+        max_guests:
+          type: integer
+        amenities:
+          type: array
+          items:
+            type: string
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        propertyId:
+          type: string
+          format: uuid
+        guestId:
+          type: string
+          format: uuid
+        checkIn:
+          type: string
+          format: date-time
+        checkOut:
+          type: string
+          format: date-time
+        totalPrice:
+          type: number
+          format: float
+        status:
+          type: string
+          enum:
+            - PENDING
+            - CONFIRMED
+            - CANCELLED
+        availability:
+          type: string
+          enum:
+            - AVAILABLE
+            - UNAVAILABLE
+        paymentUrl:
+          type: string
+          format: uri
+          description: URL para pagamento (Mercado Pago)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        booking_id:
+          type: string
+        user_id:
+          type: string
+        amount:
+          type: integer
+          description: Valor em centavos
+        currency:
+          type: string
+        payment_method:
+          type: string
+        provider_payment_id:
+          type: string
+          description: ID do pagamento no provedor (Mercado Pago)
+        external_reference:
+          type: string
+        status:
+          type: string
+          enum:
+            - PENDING
+            - APPROVED
+            - REJECTED
+            - CANCELLED
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+          example: booking-service
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensagem de erro
+        code:
+          type: string
+          description: Código do erro
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtido através do login
+
+security:
+  - bearerAuth: []
