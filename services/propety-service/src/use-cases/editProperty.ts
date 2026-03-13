@@ -3,6 +3,7 @@ import {
   EditPropertyParamsSchema,
   EditPropertyParams,
 } from "../dtos/editPropertyDto";
+import { PropertyNotFoundError } from "./errors";
 
 export class EditPropertyUseCase {
   constructor(private propertyRepository: PropertyRepository) {}
@@ -13,7 +14,7 @@ export class EditPropertyUseCase {
     const property = await this.propertyRepository.getPropertyById(id);
 
     if (!property) {
-      throw new Error("Property not found");
+      throw new PropertyNotFoundError(id);
     }
 
     const updatedProperty = await this.propertyRepository.editProperty(

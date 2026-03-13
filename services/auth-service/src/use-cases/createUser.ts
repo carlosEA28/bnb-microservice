@@ -3,6 +3,11 @@ import { CognitoService } from "../lib/aws/services/cognitoService";
 import { S3Service } from "../lib/aws/services/s3Service";
 import { UserRepository } from "../repositories/user-repository";
 import path from "path";
+import {
+  CognitoUserCreationError,
+  ImageUploadError,
+  UserAlreadyExistsError,
+} from "./errors";
 
 export class CreateUserUseCase {
   constructor(
@@ -15,8 +20,7 @@ export class CreateUserUseCase {
     const userExists = await this.userRepository.findByEmail(params.email);
 
     if (userExists) {
-      // fazer erro custom
-      throw new Error("User already exists");
+      throw new UserAlreadyExistsError(params.email);
     }
 
     const cognitoID = await this.cognitoService.signUp(
@@ -25,7 +29,7 @@ export class CreateUserUseCase {
     );
 
     if (!cognitoID) {
-      throw new Error("Error creating user in Cognito");
+      throw new CognitoUserCreationError();
     }
 
     // create user first to obtain user id to use as file name
@@ -46,7 +50,7 @@ export class CreateUserUseCase {
     );
 
     if (!imageUrl) {
-      throw new Error("Error uploading image to S3");
+      throw new ImageUploadError();
     }
 
     const updatedUser = await this.userRepository.updateUserImage(

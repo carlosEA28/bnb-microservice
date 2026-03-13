@@ -2,6 +2,7 @@ import { CognitoService } from "../lib/aws/services/cognitoService";
 import { S3Service } from "../lib/aws/services/s3Service";
 import { UserRepository } from "../repositories/user-repository";
 import path from "path";
+import { UserNotFoundError } from "./errors";
 
 export class DeleteUserUseCase {
   constructor(
@@ -14,7 +15,7 @@ export class DeleteUserUseCase {
     const user = await this.userRepository.findById(id);
 
     if (!user) {
-      throw new Error("User not found");
+      throw new UserNotFoundError(id);
     }
 
     // Deletar imagem do S3 se existir

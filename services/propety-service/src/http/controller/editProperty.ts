@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { makeEditPropertyUseCase } from "../../use-cases/factories/make-edit-property";
 import { ZodError } from "zod";
+import { PropertyNotFoundError } from "../../use-cases/errors";
 
 export async function editProperty(req: Request, res: Response) {
   const propertyId = req.params.id as string;
@@ -20,6 +21,10 @@ export async function editProperty(req: Request, res: Response) {
         error: "Validation error",
         details: error.issues,
       });
+    }
+
+    if (error instanceof PropertyNotFoundError) {
+      return res.status(404).json({ error: error.message });
     }
 
     if (error instanceof Error) {

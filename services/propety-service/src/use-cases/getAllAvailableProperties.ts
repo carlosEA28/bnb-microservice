@@ -1,4 +1,5 @@
 import { PropertyRepository } from "../repositories/property-repository";
+import { NoPropertiesFoundError } from "./errors";
 
 export class GetAllAvailableUseCase {
   constructor(private propertyRepository: PropertyRepository) {}
@@ -6,7 +7,7 @@ export class GetAllAvailableUseCase {
     const properties = await this.propertyRepository.getAllAvailablePropeties();
 
     if (properties.length == 0) {
-      throw new Error("No properties were found");
+      throw new NoPropertiesFoundError();
     }
 
     return properties;

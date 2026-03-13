@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { makeSearchPropertiesByPriceRangeUseCase } from "../../use-cases/factories/make-search-by-price-range";
 import { ZodError } from "zod";
 import { SearchPropertiesByPriceRangeParams } from "../../dtos/searchPropertiesByPriceRangeDto";
+import { NoPropertiesInPriceRangeError } from "../../use-cases/errors";
 
 export async function searchPropertiesByPriceRange(
   req: Request,
@@ -23,8 +24,12 @@ export async function searchPropertiesByPriceRange(
       });
     }
 
-    if (error instanceof Error) {
+    if (error instanceof NoPropertiesInPriceRangeError) {
       return res.status(404).json({ error: error.message });
+    }
+
+    if (error instanceof Error) {
+      return res.status(400).json({ error: error.message });
     }
 
     return res.status(500).json({

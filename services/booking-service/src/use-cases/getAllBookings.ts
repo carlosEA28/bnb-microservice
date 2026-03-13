@@ -1,4 +1,5 @@
 import { BookingRepository } from "../repositories/booking-repository";
+import { NoBookingsFoundError } from "./errors";
 
 export class GetAllBookingsUseCase {
   constructor(private bookingRepository: BookingRepository) {}
@@ -7,7 +8,7 @@ export class GetAllBookingsUseCase {
     const bookings = await this.bookingRepository.getAllBookings();
 
     if (bookings.length === 0) {
-      throw new Error("No bookings were found");
+      throw new NoBookingsFoundError();
     }
 
     return bookings;

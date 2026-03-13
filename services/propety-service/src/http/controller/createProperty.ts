@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { makeCreatePropertyUseCase } from "../../use-cases/factories/make-create-property";
 import { ZodError } from "zod";
+import { PropertyImageRequiredError } from "../../use-cases/errors";
 
 export async function createProperty(request: Request, response: Response) {
   const files = request.files as Express.Multer.File[];
@@ -33,8 +34,12 @@ export async function createProperty(request: Request, response: Response) {
       });
     }
 
-    if (error instanceof Error) {
+    if (error instanceof PropertyImageRequiredError) {
       return response.status(400).json({ error: error.message });
+    }
+
+    if (error instanceof Error) {
+      return response.status(500).json({ error: error.message });
     }
 
     return response.status(500).json({ error: "Failed to create property" });

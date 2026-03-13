@@ -1,4 +1,5 @@
 import { PropertyRepository } from "../repositories/property-repository";
+import { NoPropertiesFoundError } from "./errors";
 
 export class SearchPropertiesByCountry {
   constructor(private propertyRepository: PropertyRepository) {}
@@ -8,7 +9,7 @@ export class SearchPropertiesByCountry {
       await this.propertyRepository.searchPropertiesByCountry(country);
 
     if (properties.length == 0) {
-      throw new Error("No properties were found");
+      throw new NoPropertiesFoundError();
     }
 
     return properties;

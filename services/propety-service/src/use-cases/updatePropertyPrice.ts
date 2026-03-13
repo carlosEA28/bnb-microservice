@@ -3,6 +3,7 @@ import {
   UpdatePropertyPriceParamsSchema,
   UpdatePropertyPriceParams,
 } from "../dtos/updatePropertyPriceDto";
+import { PropertyNotFoundError } from "./errors";
 
 export class UpdatePropertyPriceUseCase {
   constructor(private propertyRepository: PropertyRepository) {}
@@ -13,7 +14,7 @@ export class UpdatePropertyPriceUseCase {
     const property = await this.propertyRepository.getPropertyById(id);
 
     if (!property) {
-      throw new Error("Property not found");
+      throw new PropertyNotFoundError(id);
     }
 
     const updatedProperty = await this.propertyRepository.updatePropertyPrice(

@@ -1,5 +1,9 @@
 import { BookingRepository } from "../repositories/booking-repository";
-import { BookingNotFoundError } from "./errors";
+import {
+  BookingAlreadyConfirmedError,
+  BookingNotFoundError,
+  CannotConfirmCancelledBookingError,
+} from "./errors";
 
 export class ConfirmBookingUseCase {
   constructor(private bookingRepository: BookingRepository) {}
@@ -12,11 +16,11 @@ export class ConfirmBookingUseCase {
     }
 
     if (booking.status === "CANCELLED") {
-      throw new Error("Cannot confirm a cancelled booking");
+      throw new CannotConfirmCancelledBookingError(bookingId);
     }
 
     if (booking.status === "CONFIRMED") {
-      throw new Error("Booking is already confirmed");
+      throw new BookingAlreadyConfirmedError(bookingId);
     }
 
     const confirmedBooking =

@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { makeConfirmBookingUseCase } from "../../use-cases/factories/make-confirm-booking";
-import { BookingNotFoundError } from "../../use-cases/errors";
+import {
+  BookingAlreadyConfirmedError,
+  BookingNotFoundError,
+  CannotConfirmCancelledBookingError,
+} from "../../use-cases/errors";
 
 export async function confirmBooking(req: Request, res: Response) {
   const bookingId = req.params.id;
@@ -19,6 +23,13 @@ export async function confirmBooking(req: Request, res: Response) {
 
     if (error instanceof BookingNotFoundError) {
       return res.status(404).json({ error: error.message });
+    }
+
+    if (
+      error instanceof CannotConfirmCancelledBookingError ||
+      error instanceof BookingAlreadyConfirmedError
+    ) {
+      return res.status(409).json({ error: error.message });
     }
 
     if (error instanceof Error) {

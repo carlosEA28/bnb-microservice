@@ -2,6 +2,7 @@ import { PropertyRepository } from "../repositories/property-repository";
 import { S3Service } from "../lib/aws/service/s3Service";
 import { randomUUID } from "crypto";
 import { CreatePropertyParamsSchema } from "../dtos/createPropertyDto";
+import { PropertyImageRequiredError } from "./errors";
 
 export class CreatePropertyUseCase {
   constructor(
@@ -13,7 +14,7 @@ export class CreatePropertyUseCase {
     const validatedParams = CreatePropertyParamsSchema.parse(params);
 
     if (!files || files.length === 0) {
-      throw new Error("At least one image is required");
+      throw new PropertyImageRequiredError();
     }
 
     const propertyId = randomUUID();

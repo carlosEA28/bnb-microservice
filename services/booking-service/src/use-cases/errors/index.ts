@@ -2,3 +2,8 @@ export { BookingNotFoundError } from "./BookingNotFoundError";
 export { PropertyNotAvailableError } from "./PropertyNotAvailableError";
 export { BookingAlreadyCancelledError } from "./BookingAlreadyCancelledError";
 export { InvalidBookingDatesError } from "./InvalidBookingDatesError";
+export { CannotConfirmCancelledBookingError } from "./CannotConfirmCancelledBookingError";
+export { BookingAlreadyConfirmedError } from "./BookingAlreadyConfirmedError";
+export { NoBookingsFoundError } from "./NoBookingsFoundError";
+export { NoBookingsFoundForGuestError } from "./NoBookingsFoundForGuestError";
+export { NoBookingsFoundForPropertyError } from "./NoBookingsFoundForPropertyError";

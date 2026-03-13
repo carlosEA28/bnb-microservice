@@ -1,4 +1,5 @@
 import { BookingRepository } from "../repositories/booking-repository";
+import { NoBookingsFoundForPropertyError } from "./errors";
 
 export class GetBookingsByPropertyUseCase {
   constructor(private bookingRepository: BookingRepository) {}
@@ -8,7 +9,7 @@ export class GetBookingsByPropertyUseCase {
       await this.bookingRepository.getBookingsByProperty(propertyId);
 
     if (bookings.length === 0) {
-      throw new Error("No bookings found for this property");
+      throw new NoBookingsFoundForPropertyError(propertyId);
     }
 
     return bookings;

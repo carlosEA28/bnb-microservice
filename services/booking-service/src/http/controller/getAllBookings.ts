@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { makeGetAllBookingsUseCase } from "../../use-cases/factories/make-get-all-bookings";
+import { NoBookingsFoundError } from "../../use-cases/errors";
 
 export async function getAllBookings(req: Request, res: Response) {
   try {
@@ -11,8 +12,12 @@ export async function getAllBookings(req: Request, res: Response) {
   } catch (error) {
     console.error("Error getting all bookings:", error);
 
-    if (error instanceof Error) {
+    if (error instanceof NoBookingsFoundError) {
       return res.status(404).json({ error: error.message });
+    }
+
+    if (error instanceof Error) {
+      return res.status(400).json({ error: error.message });
     }
 
     return res.status(500).json({ error: "Failed to get bookings" });

@@ -3,6 +3,7 @@ import {
   SearchPropertiesByPriceRangeParamsSchema,
   SearchPropertiesByPriceRangeParams,
 } from "../dtos/searchPropertiesByPriceRangeDto";
+import { NoPropertiesInPriceRangeError } from "./errors";
 
 export class SearchPropertiesByPriceRangeUseCase {
   constructor(private propertyRepository: PropertyRepository) {}
@@ -18,7 +19,7 @@ export class SearchPropertiesByPriceRangeUseCase {
       );
 
     if (properties.length === 0) {
-      throw new Error("No properties found in this price range");
+      throw new NoPropertiesInPriceRangeError(minPrice, maxPrice);
     }
 
     return properties;

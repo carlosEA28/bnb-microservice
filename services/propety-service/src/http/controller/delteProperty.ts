@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { makeDeltePropertyUseCase } from "../../use-cases/factories/make-delete-property";
+import { PropertyNotFoundError } from "../../use-cases/errors";
 
 export async function deleteProperty(req: Request, res: Response) {
   const propertyId = req.params.id;
@@ -13,6 +14,10 @@ export async function deleteProperty(req: Request, res: Response) {
       message: "property deleted",
     });
   } catch (error) {
+    if (error instanceof PropertyNotFoundError) {
+      return res.status(404).json({ error: error.message });
+    }
+
     if (error instanceof Error) {
       return res.status(400).json({ error: error.message });
     }

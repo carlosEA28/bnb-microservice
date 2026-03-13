@@ -1,5 +1,6 @@
 import { S3Service } from "../lib/aws/service/s3Service";
 import { PropertyRepository } from "../repositories/property-repository";
+import { PropertyNotFoundError } from "./errors";
 
 export class DeletePropertyUseCase {
   constructor(
@@ -11,7 +12,7 @@ export class DeletePropertyUseCase {
     const property = await this.propertyRepository.getPropertyById(id);
 
     if (!property) {
-      throw new Error("Property not found");
+      throw new PropertyNotFoundError(id);
     }
 
     if (property.propertyImages && Array.isArray(property.propertyImages)) {

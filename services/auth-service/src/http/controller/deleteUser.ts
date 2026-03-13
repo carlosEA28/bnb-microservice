@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { makeDeleteUserUseCase } from "../../use-cases/factories/make-delete-user";
+import { UserNotFoundError } from "../../use-cases/errors";
 
 export async function deleteUser(request: Request, response: Response) {
   const { id } = request.params as { id: string };
@@ -17,8 +18,8 @@ export async function deleteUser(request: Request, response: Response) {
   } catch (error) {
     console.error(error);
 
-    if (error instanceof Error && error.message === "User not found") {
-      return response.status(404).json({ error: "User not found" });
+    if (error instanceof UserNotFoundError) {
+      return response.status(404).json({ error: error.message });
     }
 
     return response.status(500).json({ error: "Failed to delete user" });
