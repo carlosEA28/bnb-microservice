@@ -16,7 +16,9 @@ export class CreateUserUseCase {
     private s3Service: S3Service,
   ) {}
 
-  async execute(params: CreateUserDto, file: Express.Multer.File) {
+  async execute(param: CreateUserDto, file: Express.Multer.File) {
+    const params = CreateUserDto.parse(param);
+
     const userExists = await this.userRepository.findByEmail(params.email);
 
     if (userExists) {
@@ -32,7 +34,6 @@ export class CreateUserUseCase {
       throw new CognitoUserCreationError();
     }
 
-    // create user first to obtain user id to use as file name
     const user = await this.userRepository.registerUser({
       name: params.name,
       email: params.email,
