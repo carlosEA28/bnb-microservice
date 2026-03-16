@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1773667555060" clover="3.2.0">
+  <project timestamp="1773667555061" name="All files">
+    <metrics statements="82" coveredstatements="82" conditionals="32" coveredconditionals="28" methods="31" coveredmethods="31" elements="145" coveredelements="141" complexity="0" loc="82" ncloc="82" packages="3" files="18" classes="18"/>
+    <package name="dtos">
+      <metrics statements="14" coveredstatements="14" conditionals="6" coveredconditionals="4" methods="9" coveredmethods="9"/>
+      <file name="createPropertyDto.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\dtos\createPropertyDto.ts">
+        <metrics statements="5" coveredstatements="5" conditionals="2" coveredconditionals="1" methods="3" coveredmethods="3"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="9" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="13" count="3" type="stmt"/>
+        <line num="17" count="3" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+      </file>
+      <file name="editPropertyDto.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\dtos\editPropertyDto.ts">
+        <metrics statements="3" coveredstatements="3" conditionals="4" coveredconditionals="3" methods="2" coveredmethods="2"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="9" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="13" count="3" type="cond" truecount="1" falsecount="1"/>
+      </file>
+      <file name="searchPropertiesByPriceRangeDto.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\dtos\searchPropertiesByPriceRangeDto.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="6" count="3" type="stmt"/>
+        <line num="10" count="3" type="stmt"/>
+        <line num="14" count="3" type="stmt"/>
+      </file>
+      <file name="updatePropertyPriceDto.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\dtos\updatePropertyPriceDto.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="5" count="3" type="stmt"/>
+      </file>
+    </package>
+    <package name="use-cases">
+      <metrics statements="60" coveredstatements="60" conditionals="24" coveredconditionals="23" methods="18" coveredmethods="18"/>
+      <file name="createProperty.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\createProperty.ts">
+        <metrics statements="9" coveredstatements="9" conditionals="4" coveredconditionals="4" methods="2" coveredmethods="2"/>
+        <line num="9" count="3" type="stmt"/>
+        <line num="10" count="3" type="stmt"/>
+        <line num="14" count="3" type="stmt"/>
+        <line num="16" count="3" type="cond" truecount="4" falsecount="0"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+      </file>
+      <file name="deleteProperty.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\deleteProperty.ts">
+        <metrics statements="11" coveredstatements="11" conditionals="6" coveredconditionals="5" methods="2" coveredmethods="2"/>
+        <line num="7" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+        <line num="12" count="2" type="stmt"/>
+        <line num="14" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="18" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="21" count="2" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="24" count="2" type="stmt"/>
+        <line num="28" count="1" type="stmt"/>
+      </file>
+      <file name="editProperty.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\editProperty.ts">
+        <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
+        <line num="9" count="3" type="stmt"/>
+        <line num="12" count="3" type="stmt"/>
+        <line num="14" count="3" type="stmt"/>
+        <line num="16" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+      </file>
+      <file name="getAllAvailableProperties.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\getAllAvailableProperties.ts">
+        <metrics statements="5" coveredstatements="5" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="7" count="2" type="stmt"/>
+        <line num="9" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+      </file>
+      <file name="getAllProperties.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\getAllProperties.ts">
+        <metrics statements="5" coveredstatements="5" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+        <line num="10" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+      </file>
+      <file name="searchPropertiesByCity.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\searchPropertiesByCity.ts">
+        <metrics statements="5" coveredstatements="5" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="9" count="2" type="stmt"/>
+        <line num="11" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+      </file>
+      <file name="searchPropertiesByCountry.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\searchPropertiesByCountry.ts">
+        <metrics statements="5" coveredstatements="5" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="9" count="2" type="stmt"/>
+        <line num="11" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+      </file>
+      <file name="searchPropertiesByPriceRange.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\searchPropertiesByPriceRange.ts">
+        <metrics statements="6" coveredstatements="6" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
+        <line num="9" count="3" type="stmt"/>
+        <line num="13" count="3" type="stmt"/>
+        <line num="16" count="3" type="stmt"/>
+        <line num="21" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+      </file>
+      <file name="updatePropertyPrice.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\updatePropertyPrice.ts">
+        <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
+        <line num="9" count="3" type="stmt"/>
+        <line num="12" count="3" type="stmt"/>
+        <line num="14" count="3" type="stmt"/>
+        <line num="16" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="use-cases.errors">
+      <metrics statements="8" coveredstatements="8" conditionals="2" coveredconditionals="1" methods="4" coveredmethods="4"/>
+      <file name="NoPropertiesFoundError.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\errors\NoPropertiesFoundError.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="3" count="4" type="stmt"/>
+        <line num="4" count="4" type="stmt"/>
+      </file>
+      <file name="NoPropertiesInPriceRangeError.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\errors\NoPropertiesInPriceRangeError.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+      </file>
+      <file name="PropertyImageRequiredError.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\errors\PropertyImageRequiredError.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+      </file>
+      <file name="PropertyNotFoundError.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\errors\PropertyNotFoundError.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="2" coveredconditionals="1" methods="1" coveredmethods="1"/>
+        <line num="3" count="3" type="stmt"/>
+        <line num="8" count="3" type="stmt"/>
+      </file>
+      <file name="index.ts" path="C:\Users\Carlos Eduardo\Desktop\pasta projetos para git\microservicos\simple-aribnb\services\propety-service\src\use-cases\errors\index.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      </file>
+    </package>
+  </project>
+</coverage>
