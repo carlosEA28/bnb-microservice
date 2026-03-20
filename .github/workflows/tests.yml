@@ -45,3 +45,14 @@ jobs:
         working-directory: services/propety-service
       - run: npm run test
         working-directory: services/propety-service
+
+  test-payment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.21.x
+      - name: Run tests
+        run: go test -v ./...
+        working-directory: services/payment-service
