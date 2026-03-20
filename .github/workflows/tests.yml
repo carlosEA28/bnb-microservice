@@ -1,0 +1,52 @@
+name: Tests
+
+on: [pull_request, push]
+
+jobs:
+  test-auth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - run: npm install
+        working-directory: services/auth-service
+      - run: npm run test
+        working-directory: services/auth-service
+
+  test-booking:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - run: npm install
+        working-directory: services/booking-service
+      - run: npm run test
+        working-directory: services/booking-service
+
+  test-property:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - run: npm install
+        working-directory: services/property-service
+      - run: npm run test
+        working-directory: services/property-service
+
+  test-payment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - run: npm install
+        working-directory: services/payment-service
+      - run: npm run test
+        working-directory: services/payment-service

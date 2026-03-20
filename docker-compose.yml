@@ -3,7 +3,6 @@ include:
   - services/booking-service/docker-compose.yml
   - services/propety-service/docker-compose.yml
   - services/payment-service/docker-compose.yml
-  # - services/webhooks-service/docker-compose.yml
 
 services:
   api-gateway:
