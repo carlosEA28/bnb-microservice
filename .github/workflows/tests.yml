@@ -10,12 +10,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.x
-      - run: npm install
+          cache: "npm"
+          cache-dependency-path: services/auth-service/package-lock.json
+      - name: Install dependencies
+        run: npm ci
         working-directory: services/auth-service
-
       - name: Generate Prisma client
-        run: npx prisma generate
-      - run: npm run test
+        run: npx prisma generate --schema=prisma/schema.prisma
+        working-directory: services/auth-service
+      - name: Run tests
+        run: npm test
         working-directory: services/auth-service
 
   test-booking:
