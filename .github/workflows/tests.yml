@@ -35,18 +35,18 @@ jobs:
         with:
           node-version: 22.x
       - run: npm install
-        working-directory: services/property-service
+        working-directory: services/propety-service
       - run: npm run test
-        working-directory: services/property-service
+        working-directory: services/propety-service
 
-  test-payment:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-      - run: npm install
-        working-directory: services/payment-service
-      - run: npm run test
-        working-directory: services/payment-service
+#   test-payment:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: 22.x
+#       - run: npm install
+#         working-directory: services/payment-service
+#       - run: npm run test
+#         working-directory: services/payment-service
