@@ -1,5 +1,5 @@
 services:
-  db:
+  property-db:
     image: bitnami/postgresql
     container_name: airbnb_property_db
     environment:
@@ -9,13 +9,10 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - property_postgres_data:/bitnami/postgresql
+      - property_postgres_data:/var/lib/postgresql/data
     networks:
       - microservices-network
 
 volumes:
   property_postgres_data:
-
-networks:
-  microservices-network:
-    external: true
+    driver: local

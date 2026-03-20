@@ -1,3 +1,10 @@
+include:
+  - services/auth-service/docker-compose.yml
+  - services/booking-service/docker-compose.yml
+  - services/propety-service/docker-compose.yml
+  - services/payment-service/docker-compose.yml
+  # - services/webhooks-service/docker-compose.yml
+
 services:
   api-gateway:
     image: kong:latest
@@ -15,6 +22,8 @@ services:
       - "8001:8001"
       - "8002:8002"
       - "8444:8444"
+    networks:
+      - microservices-network
 
   broker:
     image: rabbitmq:3-management
@@ -23,5 +32,13 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - microservices-network
+
 volumes:
   rabbitmq_data:
+    driver: local
+
+networks:
+  microservices-network:
+    driver: bridge

@@ -1,5 +1,5 @@
 services:
-  db:
+  payment-db:
     image: bitnami/postgresql
     container_name: airbnb_payment_db
     environment:
@@ -9,13 +9,10 @@ services:
     ports:
       - "5435:5432"
     volumes:
-      - payment_postgres_data:/bitnami/postgresql
+      - payment_postgres_data:/var/lib/postgresql/data
     networks:
       - microservices-network
 
 volumes:
   payment_postgres_data:
-
-networks:
-  microservices-network:
-    external: true
+    driver: local

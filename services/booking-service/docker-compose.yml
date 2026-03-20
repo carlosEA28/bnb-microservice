@@ -1,5 +1,5 @@
 services:
-  db:
+  booking-db:
     image: bitnami/postgresql
     container_name: airbnb_booking_db
     environment:
@@ -9,13 +9,10 @@ services:
     ports:
       - "5434:5432"
     volumes:
-      - booking_postgres_data:/bitnami/postgresql
+      - booking_postgres_data:/var/lib/postgresql/data
     networks:
       - microservices-network
 
 volumes:
   booking_postgres_data:
-
-networks:
-  microservices-network:
-    external: true
+    driver: local

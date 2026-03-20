@@ -1,5 +1,5 @@
 services:
-  db:
+  auth-db:
     image: bitnami/postgresql
     container_name: airbnb_auth_db
     environment:
@@ -9,13 +9,10 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - auth_postgres_data:/bitnami/postgresql
+      - auth_postgres_data:/var/lib/postgresql/data
     networks:
       - microservices-network
 
 volumes:
   auth_postgres_data:
-
-networks:
-  microservices-network:
-    external: true
+    driver: local
