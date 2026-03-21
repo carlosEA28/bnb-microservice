@@ -141,8 +141,9 @@ func main() {
 			}
 
 			_, err = ecsx.NewFargateService(ctx, fmt.Sprintf("ecs-service-%s", service), &ecsx.FargateServiceArgs{
-				Cluster:      cluster.Arn,
-				DesiredCount: pulumi.Int(1),
+				Cluster:        cluster.Arn,
+				DesiredCount:   pulumi.Int(1),
+				AssignPublicIp: pulumi.Bool(true),
 				TaskDefinitionArgs: &ecsx.FargateServiceTaskDefinitionArgs{
 					Containers: map[string]ecsx.TaskDefinitionContainerDefinitionArgs{
 						containerName: {
