@@ -33,12 +33,12 @@ jobs:
         with:
           command: up
           work-dir: ./infra
-          stack-name: dev
+          stack-name: app.pulumi.com/joao/bnb-microservice/dev
           target: |
-            urn:pulumi:dev::infra::aws:rds/instance:Instance::rds-auth-service
-            urn:pulumi:dev::infra::aws:rds/instance:Instance::rds-booking-service
-            urn:pulumi:dev::infra::aws:rds/instance:Instance::rds-payment-service
-            urn:pulumi:dev::infra::aws:rds/instance:Instance::rds-propety-service
+            urn:pulumi:app.pulumi.com/joao/bnb-microservice/dev::infra::aws:rds/instance:Instance::rds-auth-service
+            urn:pulumi:app.pulumi.com/joao/bnb-microservice/dev::infra::aws:rds/instance:Instance::rds-booking-service
+            urn:pulumi:app.pulumi.com/joao/bnb-microservice/dev::infra::aws:rds/instance:Instance::rds-payment-service
+            urn:pulumi:app.pulumi.com/joao/bnb-microservice/dev::infra::aws:rds/instance:Instance::rds-propety-service
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
@@ -105,6 +105,6 @@ jobs:
         with:
           command: up
           work-dir: ./infra
-          stack-name: dev
+          stack-name: app.pulumi.com/joao/bnb-microservice/dev
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
