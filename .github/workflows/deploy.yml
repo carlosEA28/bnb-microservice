@@ -9,7 +9,7 @@ jobs:
   tests:
     uses: ./.github/workflows/tests.yml
 
-  migrate:
+  pulumi:
     needs: tests
     runs-on: ubuntu-latest
     steps:
@@ -28,19 +28,34 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: sa-east-1
 
-      - name: Pulumi up — só o RDS
+      - name: Pulumi up
         uses: pulumi/actions@v6
         with:
           command: up
           work-dir: ./infra/pulumi
           stack-name: carlosEA28/deploy-bnb/dev
-          target: |
-            urn:pulumi:carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-auth-service
-            urn:pulumi:carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-booking-service
-            urn:pulumi:carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-payment-service
-            urn:pulumi:carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-propety-service
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+  migrate:
+    needs: pulumi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
+          cache-dependency-path: infra/pulumi/go.sum
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: sa-east-1
 
       - name: Pega endpoints do RDS
         id: rds
@@ -80,31 +95,3 @@ jobs:
         working-directory: services/payment-service
         env:
           DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.PAYMENT_DB }}/payment_db
-
-  pulumi:
-    needs: migrate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22.x"
-          cache-dependency-path: infra/pulumi/go.sum
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: sa-east-1
-
-      - name: Pulumi up
-        uses: pulumi/actions@v6
-        with:
-          command: up
-          work-dir: ./infra/pulumi
-          stack-name: carlosEA28/deploy-bnb/dev
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
