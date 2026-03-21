@@ -2,15 +2,22 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/pulumi/pulumi-aws/sdk/v7/go/aws/ecr"
+	"github.com/pulumi/pulumi-aws/sdk/v7/go/aws/ecs"
+	"github.com/pulumi/pulumi-aws/sdk/v7/go/aws/rds"
+	ecsx "github.com/pulumi/pulumi-awsx/sdk/v3/go/awsx/ecs"
 	"github.com/pulumi/pulumi-docker-build/sdk/go/dockerbuild"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
+
+		// ECR--------------------------------------------------------------------------------------------------------------------------------------------
+
 		// Lista de serviços para fazer build e push
 		services := []string{
 			"auth-service",
@@ -41,6 +48,7 @@ func main() {
 					dockerbuild.Platform_Linux_amd64,
 				},
 				Push: pulumi.Bool(true),
+
 				Registries: dockerbuild.RegistryArray{
 					&dockerbuild.RegistryArgs{
 						Address: ecrRepo.RepositoryUrl,
@@ -81,7 +89,74 @@ func main() {
 		}
 
 		ctx.Export("registry-url", ecrRepo.RepositoryUrl)
+		// return nil
+
+		// RDS ----------------------------------------------------------------------------
+		dbServices := map[string]string{
+			"auth-service":    "auth_db",
+			"booking-service": "booking_db",
+			"payment-service": "payment_db",
+			"propety-service": "property_db",
+		}
+
+		dbEndpoints := make(map[string]pulumi.StringOutput)
+
+		for service, dbName := range dbServices {
+			instance, err := rds.NewInstance(ctx, fmt.Sprintf("rds-%s", service), &rds.InstanceArgs{
+				AllocatedStorage:   pulumi.Int(20),
+				DbName:             pulumi.String(dbName),
+				Engine:             pulumi.String("postgres"),
+				EngineVersion:      pulumi.String("16.3"),
+				InstanceClass:      pulumi.String(rds.InstanceType_T3_Micro),
+				Username:           pulumi.String("postgres"),
+				Password:           pulumi.String(os.Getenv("DB_PASSWORD")),
+				SkipFinalSnapshot:  pulumi.Bool(true),
+				PubliclyAccessible: pulumi.Bool(true),
+			})
+			if err != nil {
+				return err
+			}
+			dbEndpoints[service] = instance.Endpoint
+			ctx.Export(fmt.Sprintf("db-endpoint-%s", service), instance.Endpoint)
+		}
+
+		// ECS ----------------------------------------------------------------------------
+		cluster, err := ecs.NewCluster(ctx, "deploy-ecs-cluster", nil)
+		if err != nil {
+			return err
+		}
+
+		for service, imageRef := range imageRefs {
+			containerName := service
+
+			dbUrl := pulumi.Sprintf("postgresql://postgres:%s@%s/%s", os.Getenv("DB_PASSWORD"), dbEndpoints[service], dbServices[service])
+
+			env := ecsx.TaskDefinitionKeyValuePairArray{
+				ecsx.TaskDefinitionKeyValuePairArgs{
+					Name:  pulumi.String("DATABASE_URL"),
+					Value: dbUrl,
+				},
+			}
+
+			_, err = ecsx.NewFargateService(ctx, fmt.Sprintf("ecs-service-%s", service), &ecsx.FargateServiceArgs{
+				Cluster:      cluster.Arn,
+				DesiredCount: pulumi.Int(1),
+				TaskDefinitionArgs: &ecsx.FargateServiceTaskDefinitionArgs{
+					Containers: map[string]ecsx.TaskDefinitionContainerDefinitionArgs{
+						containerName: {
+							Image:       imageRef,
+							Cpu:         pulumi.Int(256),
+							Memory:      pulumi.Int(512),
+							Environment: env,
+						},
+					},
+				},
+			}, nil)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
-
 }

@@ -9,7 +9,7 @@ jobs:
   tests:
     uses: ./.github/workflows/tests.yml
 
-  pulumi:
+  migrate:
     needs: tests
     runs-on: ubuntu-latest
     steps:
@@ -18,7 +18,79 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.25.x"
+          go-version: "1.22.x"
+          cache-dependency-path: infra/go.sum
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: sa-east-1
+
+      - name: Pulumi up — só o RDS
+        uses: pulumi/actions@v6
+        with:
+          command: up
+          work-dir: ./infra
+          stack-name: prod
+          target: |
+            urn:pulumi:prod::infra::aws:rds/instance:Instance::rds-auth-service
+            urn:pulumi:prod::infra::aws:rds/instance:Instance::rds-booking-service
+            urn:pulumi:prod::infra::aws:rds/instance:Instance::rds-payment-service
+            urn:pulumi:prod::infra::aws:rds/instance:Instance::rds-propety-service
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      - name: Pega endpoints do RDS
+        id: rds
+        run: |
+          cd infra
+          echo "AUTH_DB=$(pulumi stack output db-endpoint-auth-service)" >> $GITHUB_OUTPUT
+          echo "BOOKING_DB=$(pulumi stack output db-endpoint-booking-service)" >> $GITHUB_OUTPUT
+          echo "PAYMENT_DB=$(pulumi stack output db-endpoint-payment-service)" >> $GITHUB_OUTPUT
+          echo "PROPERTY_DB=$(pulumi stack output db-endpoint-propety-service)" >> $GITHUB_OUTPUT
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Migrate — auth-service
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        working-directory: services/auth-service
+        env:
+          DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.AUTH_DB }}/auth_db
+
+      - name: Migrate — booking-service
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        working-directory: services/booking-service
+        env:
+          DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.BOOKING_DB }}/booking_db
+
+      - name: Migrate — property-service
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        working-directory: services/propety-service
+        env:
+          DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.PROPERTY_DB }}/property_db
+
+      - name: Migrate — payment-service
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        working-directory: services/payment-service
+        env:
+          DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.PAYMENT_DB }}/payment_db
+
+  pulumi:
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
           cache-dependency-path: infra/go.sum
 
       - name: Configure AWS credentials
