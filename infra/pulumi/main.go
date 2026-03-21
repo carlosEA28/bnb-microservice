@@ -101,7 +101,7 @@ func main() {
 				AllocatedStorage:   pulumi.Int(20),
 				DbName:             pulumi.String(dbName),
 				Engine:             pulumi.String("postgres"),
-				EngineVersion:      pulumi.String("16.3"),
+				EngineVersion:      pulumi.String("16"),
 				InstanceClass:      pulumi.String(rds.InstanceType_T3_Micro),
 				Username:           pulumi.String("postgres"),
 				Password:           pulumi.String(os.Getenv("DB_PASSWORD")),
