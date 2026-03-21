@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "1.22.x"
-          cache-dependency-path: infra/go.sum
+          cache-dependency-path: infra/pulumi/go.sum
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -32,7 +32,7 @@ jobs:
         uses: pulumi/actions@v6
         with:
           command: up
-          work-dir: ./infra
+          work-dir: ./infra/pulumi
           stack-name: carlosEA28/deploy-bnb/dev
           target: |
             urn:pulumi:carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-auth-service
@@ -45,7 +45,7 @@ jobs:
       - name: Pega endpoints do RDS
         id: rds
         run: |
-          cd infra
+          cd infra/pulumi
           echo "AUTH_DB=$(pulumi stack output db-endpoint-auth-service)" >> $GITHUB_OUTPUT
           echo "BOOKING_DB=$(pulumi stack output db-endpoint-booking-service)" >> $GITHUB_OUTPUT
           echo "PAYMENT_DB=$(pulumi stack output db-endpoint-payment-service)" >> $GITHUB_OUTPUT
@@ -91,7 +91,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "1.22.x"
-          cache-dependency-path: infra/go.sum
+          cache-dependency-path: infra/pulumi/go.sum
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -104,7 +104,7 @@ jobs:
         uses: pulumi/actions@v6
         with:
           command: up
-          work-dir: ./infra
+          work-dir: ./infra/pulumi
           stack-name: carlosEA28/deploy-bnb/dev
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
