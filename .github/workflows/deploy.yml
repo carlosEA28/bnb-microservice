@@ -33,12 +33,12 @@ jobs:
         with:
           command: up
           work-dir: ./infra
-          stack-name: app.pulumi.com/carlosEA28/deploy-bnb/dev
+          stack-name: carlosEA28/deploy-bnb/dev
           target: |
-            urn:pulumi:app.pulumi.com/carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-auth-service
-            urn:pulumi:app.pulumi.com/carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-booking-service
-            urn:pulumi:app.pulumi.com/carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-payment-service
-            urn:pulumi:app.pulumi.com/carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-propety-service
+            urn:pulumi:carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-auth-service
+            urn:pulumi:carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-booking-service
+            urn:pulumi:carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-payment-service
+            urn:pulumi:carlosEA28/deploy-bnb/dev::infra::aws:rds/instance:Instance::rds-propety-service
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
@@ -105,6 +105,6 @@ jobs:
         with:
           command: up
           work-dir: ./infra
-          stack-name: app.pulumi.com/carlosEA28/deploy-bnb/dev
+          stack-name: carlosEA28/deploy-bnb/dev
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
