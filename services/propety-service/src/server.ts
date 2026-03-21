@@ -1,5 +1,6 @@
 import { app } from "./app";
+import { env } from "./env/env";
 
-app.listen(3001, () => {
-  console.log("Property service is running on port 3001");
+app.listen(Number(env.PORT), () => {
+  console.log(`Property service is running on port ${env.PORT}`);
 });
