@@ -1,6 +1,9 @@
 name: Tests
 
-on: [pull_request, push]
+on:
+  pull_request:
+  push:
+  workflow_call:
 
 jobs:
   test-auth:
@@ -29,9 +32,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.x
-      - run: npm install
+      - run: npm ci
         working-directory: services/booking-service
-      - run: npm run test
+      - run: npm test
         working-directory: services/booking-service
 
   test-property:
@@ -41,18 +44,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.x
-      - run: npm install
+      - run: npm ci
         working-directory: services/propety-service
-      - run: npm run test
+      - run: npm test
         working-directory: services/propety-service
 
   test-payment:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: 1.25.x
+          go-version: "1.22.x"
       - name: Run tests
         run: go test -v ./...
         working-directory: services/payment-service
