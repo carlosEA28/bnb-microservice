@@ -1,35 +1,20 @@
-FROM node:22-alpine AS base
-
-FROM base AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --only=production --fetch-retries=5 --fetch-retry-mintimeout=20000
 
-FROM base AS prod-deps
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --only=production
-
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY package.json package-lock.json tsconfig.json ./
-COPY prisma ./prisma
-COPY src ./src
-RUN npx tsc
-
-FROM base AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 api
-RUN mkdir dist && chown api:nodejs dist && chown api:nodejs .
+RUN chown api:nodejs .
 COPY --chown=api:nodejs package.json ./
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=builder --chown=api:nodejs /app/dist ./dist
-COPY --from=builder --chown=api:nodejs /app/prisma ./prisma
+COPY --from=deps /app/node_modules ./node_modules
+COPY --chown=api:nodejs prisma ./prisma
+COPY --chown=api:nodejs src ./src
 USER api
 EXPOSE 3002
 ENV PORT=3002
 ENV HOSTNAME="0.0.0.0"
-CMD ["node", "dist/server.js"]
+CMD ["npx", "tsx", "src/server.ts"]
