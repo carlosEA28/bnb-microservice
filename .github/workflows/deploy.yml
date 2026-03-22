@@ -61,19 +61,14 @@ jobs:
         id: rds
         run: |
           cd infra/pulumi
-          AUTH=$(pulumi stack output db-endpoint-auth-service --stack carlosEA28/deploy-bnb/dev)
-          BOOKING=$(pulumi stack output db-endpoint-booking-service --stack carlosEA28/deploy-bnb/dev)
-          PAYMENT=$(pulumi stack output db-endpoint-payment-service --stack carlosEA28/deploy-bnb/dev)
-          PROPERTY=$(pulumi stack output db-endpoint-propety-service --stack carlosEA28/deploy-bnb/dev)
+          AUTH=$(pulumi stack output db-endpoint-auth-service --stack carlosEA28/deploy-bnb/dev | cut -d: -f1)
+          BOOKING=$(pulumi stack output db-endpoint-booking-service --stack carlosEA28/deploy-bnb/dev | cut -d: -f1)
+          PAYMENT=$(pulumi stack output db-endpoint-payment-service --stack carlosEA28/deploy-bnb/dev | cut -d: -f1)
+          PROPERTY=$(pulumi stack output db-endpoint-propety-service --stack carlosEA28/deploy-bnb/dev | cut -d: -f1)
           echo "AUTH_DB=$AUTH" >> $GITHUB_OUTPUT
           echo "BOOKING_DB=$BOOKING" >> $GITHUB_OUTPUT
           echo "PAYMENT_DB=$PAYMENT" >> $GITHUB_OUTPUT
           echo "PROPERTY_DB=$PROPERTY" >> $GITHUB_OUTPUT
-          echo "--- DEBUG ---"
-          echo "AUTH: $AUTH"
-          echo "BOOKING: $BOOKING"
-          echo "PAYMENT: $PAYMENT"
-          echo "PROPERTY: $PROPERTY"
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
@@ -113,8 +108,14 @@ jobs:
 
       - name: Migrate — payment-service
         run: |
-          npm ci
-          npx prisma migrate deploy --schema=prisma/schema.prisma
+          go install github.com/pressly/goose/v3/cmd/goose@latest
+          goose -dir ./internal/db/migrations postgres \
+            "host=$DB_HOST port=$DB_PORT user=$DB_USER password=$DB_PASSWORD dbname=$DB_NAME sslmode=disable" up
         working-directory: services/payment-service
         env:
-          DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.PAYMENT_DB }}/payment_db
+          DB_HOST: ${{ steps.rds.outputs.PAYMENT_DB }}
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: payment_db
+          DB_SSL_MODE: disable
