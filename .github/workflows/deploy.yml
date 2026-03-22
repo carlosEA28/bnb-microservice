@@ -73,25 +73,33 @@ jobs:
           node-version: 22.x
 
       - name: Migrate — auth-service
-        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        run: |
+          npm ci
+          npx prisma migrate deploy --schema=prisma/schema.prisma
         working-directory: services/auth-service
         env:
           DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.AUTH_DB }}/auth_db
 
       - name: Migrate — booking-service
-        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        run: |
+          npm ci
+          npx prisma migrate deploy --schema=prisma/schema.prisma
         working-directory: services/booking-service
         env:
           DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.BOOKING_DB }}/booking_db
 
       - name: Migrate — property-service
-        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        run: |
+          npm ci
+          npx prisma migrate deploy --schema=prisma/schema.prisma
         working-directory: services/propety-service
         env:
           DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.PROPERTY_DB }}/property_db
 
       - name: Migrate — payment-service
-        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+        run: |
+          npm ci
+          npx prisma migrate deploy --schema=prisma/schema.prisma
         working-directory: services/payment-service
         env:
           DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.PAYMENT_DB }}/payment_db
