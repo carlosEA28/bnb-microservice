@@ -61,10 +61,10 @@ jobs:
         id: rds
         run: |
           cd infra/pulumi
-          AUTH=$(pulumi stack output db-endpoint-auth-service)
-          BOOKING=$(pulumi stack output db-endpoint-booking-service)
-          PAYMENT=$(pulumi stack output db-endpoint-payment-service)
-          PROPERTY=$(pulumi stack output db-endpoint-propety-service)
+          AUTH=$(pulumi stack output db-endpoint-auth-service --stack carlosEA28/deploy-bnb/dev)
+          BOOKING=$(pulumi stack output db-endpoint-booking-service --stack carlosEA28/deploy-bnb/dev)
+          PAYMENT=$(pulumi stack output db-endpoint-payment-service --stack carlosEA28/deploy-bnb/dev)
+          PROPERTY=$(pulumi stack output db-endpoint-propety-service --stack carlosEA28/deploy-bnb/dev)
           echo "AUTH_DB=$AUTH" >> $GITHUB_OUTPUT
           echo "BOOKING_DB=$BOOKING" >> $GITHUB_OUTPUT
           echo "PAYMENT_DB=$PAYMENT" >> $GITHUB_OUTPUT
