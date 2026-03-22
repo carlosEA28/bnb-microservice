@@ -89,6 +89,12 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@${{ steps.rds.outputs.AUTH_DB }}/auth_db
 
+      - name: Debug booking
+        run: |
+          ls -la
+          cat package-lock.json | head -5
+        working-directory: services/booking-service
+
       - name: Migrate — booking-service
         run: |
           npm ci
