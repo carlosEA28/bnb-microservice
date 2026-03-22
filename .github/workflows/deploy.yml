@@ -61,10 +61,19 @@ jobs:
         id: rds
         run: |
           cd infra/pulumi
-          echo "AUTH_DB=$(pulumi stack output db-endpoint-auth-service)" >> $GITHUB_OUTPUT
-          echo "BOOKING_DB=$(pulumi stack output db-endpoint-booking-service)" >> $GITHUB_OUTPUT
-          echo "PAYMENT_DB=$(pulumi stack output db-endpoint-payment-service)" >> $GITHUB_OUTPUT
-          echo "PROPERTY_DB=$(pulumi stack output db-endpoint-propety-service)" >> $GITHUB_OUTPUT
+          AUTH=$(pulumi stack output db-endpoint-auth-service)
+          BOOKING=$(pulumi stack output db-endpoint-booking-service)
+          PAYMENT=$(pulumi stack output db-endpoint-payment-service)
+          PROPERTY=$(pulumi stack output db-endpoint-propety-service)
+          echo "AUTH_DB=$AUTH" >> $GITHUB_OUTPUT
+          echo "BOOKING_DB=$BOOKING" >> $GITHUB_OUTPUT
+          echo "PAYMENT_DB=$PAYMENT" >> $GITHUB_OUTPUT
+          echo "PROPERTY_DB=$PROPERTY" >> $GITHUB_OUTPUT
+          echo "--- DEBUG ---"
+          echo "AUTH: $AUTH"
+          echo "BOOKING: $BOOKING"
+          echo "PAYMENT: $PAYMENT"
+          echo "PROPERTY: $PROPERTY"
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
