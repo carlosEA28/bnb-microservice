@@ -219,6 +219,35 @@ func main() {
 							Value: dbUrl,
 						},
 					}
+
+					if service == "auth-service" {
+						env = append(env,
+							ecsx.TaskDefinitionKeyValuePairArgs{
+								Name:  pulumi.String("AWS_REGION"),
+								Value: pulumi.String("sa-east-1"),
+							},
+							ecsx.TaskDefinitionKeyValuePairArgs{
+								Name:  pulumi.String("COGNITO_USER_POOL_ID"),
+								Value: pulumi.String(os.Getenv("COGNITO_USER_POOL_ID")),
+							},
+							ecsx.TaskDefinitionKeyValuePairArgs{
+								Name:  pulumi.String("COGNITO_CLIENT_ID"),
+								Value: pulumi.String(os.Getenv("COGNITO_CLIENT_ID")),
+							},
+							ecsx.TaskDefinitionKeyValuePairArgs{
+								Name:  pulumi.String("COGNITO_SECRET"),
+								Value: pulumi.String(os.Getenv("COGNITO_SECRET")),
+							},
+							ecsx.TaskDefinitionKeyValuePairArgs{
+								Name:  pulumi.String("AWS_ACCESS_KEY_ID"),
+								Value: pulumi.String(os.Getenv("AWS_ACCESS_KEY_ID")),
+							},
+							ecsx.TaskDefinitionKeyValuePairArgs{
+								Name:  pulumi.String("AWS_SECRET_ACCESS_KEY"),
+								Value: pulumi.String(os.Getenv("AWS_SECRET_ACCESS_KEY")),
+							},
+						)
+					}
 				}
 			}
 

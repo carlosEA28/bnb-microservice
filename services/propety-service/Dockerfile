@@ -2,6 +2,8 @@ FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --only=production --fetch-retries=5 --fetch-retry-mintimeout=20000
+COPY prisma ./prisma
+RUN npx prisma generate --schema=prisma/schema.prisma
 
 FROM node:22-alpine AS runner
 WORKDIR /app
