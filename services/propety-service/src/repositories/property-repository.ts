@@ -1,6 +1,10 @@
 import { CreatePropertyData } from "../dtos/createPropertyDto";
 import { EditPropertyParams } from "../dtos/editPropertyDto";
-import { Property } from "../generated/prisma/client";
+import { Property, Prisma } from "../generated/prisma/client";
+
+type PropertyWithImages = Prisma.PropertyGetPayload<{
+  include: { propertyImages: true };
+}>;
 
 export interface PropertyRepository {
   // autenticado
@@ -17,7 +21,7 @@ export interface PropertyRepository {
     minPrice: number,
     maxPrice: number,
   ): Promise<Property[]>;
-  getPropertyById(id: string): Promise<Property>;
+  getPropertyById(id: string): Promise<PropertyWithImages>;
   getAllProperties(): Promise<Property[]>;
   getAllAvailablePropeties(): Promise<Property[]>;
 }

@@ -1,8 +1,12 @@
-import { Property } from "../../generated/prisma/client";
+import { Property, Prisma } from "../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { PropertyRepository } from "../property-repository";
 import { CreatePropertyData } from "../../dtos/createPropertyDto";
 import { EditPropertyParams } from "../../dtos/editPropertyDto";
+
+type PropertyWithImages = Prisma.PropertyGetPayload<{
+  include: { propertyImages: true };
+}>;
 
 export class PrismaPropertyRepository implements PropertyRepository {
   async getAllProperties(): Promise<Property[]> {
@@ -74,7 +78,7 @@ export class PrismaPropertyRepository implements PropertyRepository {
     });
   }
 
-  async getPropertyById(id: string): Promise<Property> {
+  async getPropertyById(id: string): Promise<PropertyWithImages> {
     const property = await prisma.property.findUnique({
       where: { id },
       include: {
