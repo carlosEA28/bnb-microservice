@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pulumi/pulumi-aws/sdk/v7/go/aws/ec2"
 	"github.com/pulumi/pulumi-aws/sdk/v7/go/aws/ecr"
 	"github.com/pulumi/pulumi-aws/sdk/v7/go/aws/ecs"
 	"github.com/pulumi/pulumi-aws/sdk/v7/go/aws/rds"
@@ -97,16 +98,32 @@ func main() {
 		dbEndpoints := make(map[string]pulumi.StringOutput)
 
 		for service, dbName := range dbServices {
+
+			sg, err := ec2.NewSecurityGroup(ctx, fmt.Sprintf("rds-sg-%s", service), &ec2.SecurityGroupArgs{
+				Ingress: ec2.SecurityGroupIngressArray{
+					&ec2.SecurityGroupIngressArgs{
+						FromPort:   pulumi.Int(5432),
+						ToPort:     pulumi.Int(5432),
+						Protocol:   pulumi.String("tcp"),
+						CidrBlocks: pulumi.StringArray{pulumi.String("0.0.0.0/0")},
+					},
+				},
+			})
+			if err != nil {
+				return err
+			}
+
 			instance, err := rds.NewInstance(ctx, fmt.Sprintf("rds-%s", service), &rds.InstanceArgs{
-				AllocatedStorage:   pulumi.Int(20),
-				DbName:             pulumi.String(dbName),
-				Engine:             pulumi.String("postgres"),
-				EngineVersion:      pulumi.String("16"),
-				InstanceClass:      pulumi.String(rds.InstanceType_T3_Micro),
-				Username:           pulumi.String("postgres"),
-				Password:           pulumi.String(os.Getenv("DB_PASSWORD")),
-				SkipFinalSnapshot:  pulumi.Bool(true),
-				PubliclyAccessible: pulumi.Bool(true),
+				AllocatedStorage:    pulumi.Int(20),
+				DbName:              pulumi.String(dbName),
+				Engine:              pulumi.String("postgres"),
+				EngineVersion:       pulumi.String("16"),
+				InstanceClass:       pulumi.String(rds.InstanceType_T3_Micro),
+				Username:            pulumi.String("postgres"),
+				Password:            pulumi.String(os.Getenv("DB_PASSWORD")),
+				SkipFinalSnapshot:   pulumi.Bool(true),
+				PubliclyAccessible:  pulumi.Bool(true),
+				VpcSecurityGroupIds: pulumi.StringArray{sg.ID()},
 			})
 			if err != nil {
 				return err
