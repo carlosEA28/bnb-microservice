@@ -110,7 +110,7 @@ jobs:
         run: |
           go install github.com/pressly/goose/v3/cmd/goose@latest
           goose -dir ./internal/db/migrations postgres \
-            "host=$DB_HOST port=$DB_PORT user=$DB_USER password=$DB_PASSWORD dbname=$DB_NAME sslmode=disable" up
+            "host=$DB_HOST port=$DB_PORT user=$DB_USER password=$DB_PASSWORD dbname=$DB_NAME sslmode=require" up
         working-directory: services/payment-service
         env:
           DB_HOST: ${{ steps.rds.outputs.PAYMENT_DB }}
@@ -118,4 +118,3 @@ jobs:
           DB_USER: postgres
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: payment_db
-          DB_SSL_MODE: disable
