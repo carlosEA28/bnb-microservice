@@ -87,6 +87,10 @@ func CreateECS(ctx *pulumi.Context, imageRefs map[string]pulumi.StringOutput, db
 						Name:  pulumi.String("DB_SSL_MODE"),
 						Value: pulumi.String("require"),
 					},
+					ecsx.TaskDefinitionKeyValuePairArgs{
+						Name:  pulumi.String("RABBITMQ_URL"),
+						Value: pulumi.Sprintf("amqp://%s:%s@%s:5672", rabbitmqUser, rabbitmqPass, "ecs-service-rabbitmq"),
+					},
 				}
 			} else {
 				dbUrl := pulumi.Sprintf("postgresql://postgres:%s@%s/%s",
@@ -126,6 +130,21 @@ func CreateECS(ctx *pulumi.Context, imageRefs map[string]pulumi.StringOutput, db
 						ecsx.TaskDefinitionKeyValuePairArgs{
 							Name:  pulumi.String("AWS_SECRET_ACCESS_KEY"),
 							Value: pulumi.String(os.Getenv("AWS_SECRET_ACCESS_KEY")),
+						},
+					)
+				} else if service == "propety-service" {
+					env = append(env,
+						ecsx.TaskDefinitionKeyValuePairArgs{
+							Name:  pulumi.String("AWS_ACCESS_KEY_ID"),
+							Value: pulumi.String(os.Getenv("AWS_ACCESS_KEY_ID")),
+						},
+						ecsx.TaskDefinitionKeyValuePairArgs{
+							Name:  pulumi.String("AWS_SECRET_ACCESS_KEY"),
+							Value: pulumi.String(os.Getenv("AWS_SECRET_ACCESS_KEY")),
+						},
+						ecsx.TaskDefinitionKeyValuePairArgs{
+							Name:  pulumi.String("AWS_BUCKET_NAME"),
+							Value: pulumi.String(os.Getenv("AWS_BUCKET_NAME")),
 						},
 					)
 				}
