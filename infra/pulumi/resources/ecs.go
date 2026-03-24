@@ -20,6 +20,7 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 		return nil, err
 	}
 
+	// 1. Namespace para Service Discovery (Cloud Map)
 	namespace, err := servicediscovery.NewPrivateDnsNamespace(ctx, "internal-dns", &servicediscovery.PrivateDnsNamespaceArgs{
 		Name:        pulumi.String("local"),
 		Vpc:         vpcId,
@@ -29,15 +30,35 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 		return nil, err
 	}
 
+	rabbitDiscoveryService, err := servicediscovery.NewService(ctx, "rabbitmq-sd-service", &servicediscovery.ServiceArgs{
+		Name: pulumi.String("rabbitmq"), // O DNS final será rabbitmq.local
+		DnsConfig: &servicediscovery.ServiceDnsConfigArgs{
+			NamespaceId: namespace.ID(),
+			DnsRecords: servicediscovery.ServiceDnsConfigDnsRecordArray{
+				&servicediscovery.ServiceDnsConfigDnsRecordArgs{
+					Type: pulumi.String("A"),
+					Ttl:  pulumi.Int(60),
+				},
+			},
+		},
+		HealthCheckCustomConfig: &servicediscovery.ServiceHealthCheckCustomConfigArgs{
+			FailureThreshold: pulumi.Int(1),
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	rabbitmqUser := os.Getenv("RABBITMQ_USER")
 	rabbitmqPass := os.Getenv("RABBITMQ_PASS")
 
+	// 3. Serviço Fargate do RabbitMQ
 	_, err = ecsx.NewFargateService(ctx, "ecs-service-rabbitmq", &ecsx.FargateServiceArgs{
 		Cluster:        cluster.Arn,
 		DesiredCount:   pulumi.Int(1),
 		AssignPublicIp: pulumi.Bool(true),
 		ServiceRegistries: &ecs.ServiceServiceRegistriesArgs{
-			RegistryArn: namespace.Arn,
+			RegistryArn: rabbitDiscoveryService.Arn, // Agora usando o ARN do ServiceDiscovery Service
 		},
 		TaskDefinitionArgs: &ecsx.FargateServiceTaskDefinitionArgs{
 			Containers: map[string]ecsx.TaskDefinitionContainerDefinitionArgs{
@@ -62,11 +83,12 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 				},
 			},
 		},
-	}, nil)
+	})
 	if err != nil {
 		return nil, err
 	}
 
+	// 4. Loop para os outros Microsserviços
 	for service, imageRef := range imageRefs {
 		containerName := service
 		var env ecsx.TaskDefinitionKeyValuePairArray
@@ -83,7 +105,7 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 
 					ecsx.TaskDefinitionKeyValuePairArgs{
 						Name:  pulumi.String("RABBITMQ_URL"),
-						Value: pulumi.Sprintf("amqp://%s:%s@%s:5672", rabbitmqUser, rabbitmqPass, "ecs-service-rabbitmq.local"),
+						Value: pulumi.Sprintf("amqp://%s:%s@rabbitmq.local:5672", rabbitmqUser, rabbitmqPass),
 					},
 				}
 			} else {
@@ -98,7 +120,7 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 			}
 		}
 
-		// Auth Service
+		// Auth Service Env
 		if service == "auth-service" {
 			env = append(env,
 				ecsx.TaskDefinitionKeyValuePairArgs{Name: pulumi.String("AWS_REGION"), Value: pulumi.String("sa-east-1")},
@@ -110,7 +132,7 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 			)
 		}
 
-		// PROBLEMA 4: Property Service (Corrigido o nome de 'propety')
+		// Property Service Env
 		if service == "propety-service" {
 			env = append(env,
 				ecsx.TaskDefinitionKeyValuePairArgs{Name: pulumi.String("AWS_ACCESS_KEY_ID"), Value: pulumi.String(os.Getenv("AWS_ACCESS_KEY_ID"))},
@@ -120,14 +142,14 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 			)
 		}
 
-		// Injeção do Mercado Pago
+		// Webhooks Service Env
 		if service == "webhooks-service" {
 			env = append(env,
 				ecsx.TaskDefinitionKeyValuePairArgs{Name: pulumi.String("MP_ACCESS_TOKEN"), Value: pulumi.String(os.Getenv("MP_ACCESS_TOKEN"))},
 			)
 		}
 
-		// Criação do Fargate Service
+		// Criação do Fargate Service para cada microsserviço
 		_, err = ecsx.NewFargateService(ctx, fmt.Sprintf("ecs-service-%s", service), &ecsx.FargateServiceArgs{
 			Cluster:        cluster.Arn,
 			DesiredCount:   pulumi.Int(1),
@@ -142,7 +164,7 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 					},
 				},
 			},
-		}, nil)
+		})
 		if err != nil {
 			return nil, err
 		}
