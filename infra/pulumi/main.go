@@ -8,20 +8,24 @@ import (
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		// Create ECR
+
 		ecrOutput, err := resources.CreateECR(ctx)
 		if err != nil {
 			return err
 		}
 
-		// Create RDS
 		rdsOutput, err := resources.CreateRDS(ctx)
 		if err != nil {
 			return err
 		}
 
-		// Create ECS
-		_, err = resources.CreateECS(ctx, ecrOutput.ImageRefs, rdsOutput.DBEndpoints, rdsOutput.DBServices)
+		_, err = resources.CreateECS(
+			ctx,
+			rdsOutput.VpcId,
+			ecrOutput.ImageRefs,
+			rdsOutput.DBEndpoints,
+			rdsOutput.DBServices,
+		)
 		if err != nil {
 			return err
 		}

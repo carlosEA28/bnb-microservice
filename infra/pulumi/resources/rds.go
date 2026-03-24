@@ -12,20 +12,29 @@ import (
 type RDSOutput struct {
 	DBEndpoints map[string]pulumi.StringOutput
 	DBServices  map[string]string
+	VpcId       pulumi.StringOutput // Campo para exportar a VPC
 }
 
 func CreateRDS(ctx *pulumi.Context) (*RDSOutput, error) {
+
+	defaultVpc, err := ec2.LookupVpc(ctx, &ec2.LookupVpcArgs{Default: pulumi.BoolRef(true)})
+	if err != nil {
+		return nil, err
+	}
+	vpcId := pulumi.String(defaultVpc.Id).ToStringOutput()
+
 	dbServices := map[string]string{
-		"auth-service":    "auth_db",
-		"booking-service": "booking_db",
-		"payment-service": "payment_db",
-		"propety-service": "property_db",
+		"auth-service":     "auth_db",
+		"booking-service":  "booking_db",
+		"payment-service":  "payment_db",
+		"property-service": "property_db",
 	}
 
 	dbEndpoints := make(map[string]pulumi.StringOutput)
 
 	for service, dbName := range dbServices {
 		sg, err := ec2.NewSecurityGroup(ctx, fmt.Sprintf("rds-sg-%s", service), &ec2.SecurityGroupArgs{
+			VpcId: vpcId,
 			Ingress: ec2.SecurityGroupIngressArray{
 				&ec2.SecurityGroupIngressArgs{
 					FromPort:   pulumi.Int(5432),
@@ -44,7 +53,7 @@ func CreateRDS(ctx *pulumi.Context) (*RDSOutput, error) {
 			DbName:              pulumi.String(dbName),
 			Engine:              pulumi.String("postgres"),
 			EngineVersion:       pulumi.String("16"),
-			InstanceClass:       pulumi.String(rds.InstanceType_T3_Micro),
+			InstanceClass:       pulumi.String("db.t3.micro"),
 			Username:            pulumi.String("postgres"),
 			Password:            pulumi.String(os.Getenv("DB_PASSWORD")),
 			SkipFinalSnapshot:   pulumi.Bool(true),
@@ -61,5 +70,6 @@ func CreateRDS(ctx *pulumi.Context) (*RDSOutput, error) {
 	return &RDSOutput{
 		DBEndpoints: dbEndpoints,
 		DBServices:  dbServices,
+		VpcId:       vpcId,
 	}, nil
 }
