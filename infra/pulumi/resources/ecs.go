@@ -20,7 +20,6 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 		return nil, err
 	}
 
-	
 	namespace, err := servicediscovery.NewPrivateDnsNamespace(ctx, "internal-dns", &servicediscovery.PrivateDnsNamespaceArgs{
 		Name:        pulumi.String("local"),
 		Vpc:         vpcId,
@@ -32,7 +31,6 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 
 	rabbitmqUser := os.Getenv("RABBITMQ_USER")
 	rabbitmqPass := os.Getenv("RABBITMQ_PASS")
-
 
 	_, err = ecsx.NewFargateService(ctx, "ecs-service-rabbitmq", &ecsx.FargateServiceArgs{
 		Cluster:        cluster.Arn,
@@ -73,7 +71,6 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 		containerName := service
 		var env ecsx.TaskDefinitionKeyValuePairArray
 
-		
 		if dbEndpoint, ok := dbEndpoints[service]; ok {
 			if service == "payment-service" {
 				env = ecsx.TaskDefinitionKeyValuePairArray{
@@ -83,7 +80,7 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 					ecsx.TaskDefinitionKeyValuePairArgs{Name: pulumi.String("DB_PASSWORD"), Value: pulumi.String(os.Getenv("DB_PASSWORD"))},
 					ecsx.TaskDefinitionKeyValuePairArgs{Name: pulumi.String("DB_NAME"), Value: pulumi.String(dbServices[service])},
 					ecsx.TaskDefinitionKeyValuePairArgs{Name: pulumi.String("DB_SSL_MODE"), Value: pulumi.String("require")},
-				
+
 					ecsx.TaskDefinitionKeyValuePairArgs{
 						Name:  pulumi.String("RABBITMQ_URL"),
 						Value: pulumi.Sprintf("amqp://%s:%s@%s:5672", rabbitmqUser, rabbitmqPass, "ecs-service-rabbitmq.local"),
@@ -101,8 +98,6 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 			}
 		}
 
-		
-		
 		// Auth Service
 		if service == "auth-service" {
 			env = append(env,
@@ -116,7 +111,7 @@ func CreateECS(ctx *pulumi.Context, vpcId pulumi.StringInput, imageRefs map[stri
 		}
 
 		// PROBLEMA 4: Property Service (Corrigido o nome de 'propety')
-		if service == "property-service" {
+		if service == "propety-service" {
 			env = append(env,
 				ecsx.TaskDefinitionKeyValuePairArgs{Name: pulumi.String("AWS_ACCESS_KEY_ID"), Value: pulumi.String(os.Getenv("AWS_ACCESS_KEY_ID"))},
 				ecsx.TaskDefinitionKeyValuePairArgs{Name: pulumi.String("AWS_SECRET_ACCESS_KEY"), Value: pulumi.String(os.Getenv("AWS_SECRET_ACCESS_KEY"))},
