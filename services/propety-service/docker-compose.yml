@@ -13,6 +13,21 @@ services:
     networks:
       - microservices-network
 
+  property-service:
+    build: .
+    container_name: property-service
+    depends_on:
+      - property-db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@property-db:5432/property_db
+    networks:
+      - microservices-network
+    ports:
+      - "3001:3001"
+
 volumes:
   property_postgres_data:
-    driver: local
+
+networks:
+  microservices-network:
+    external: true

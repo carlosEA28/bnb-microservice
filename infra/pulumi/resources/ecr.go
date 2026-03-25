@@ -60,15 +60,15 @@ func CreateECR(ctx *pulumi.Context) (*ECROutput, error) {
 					return fmt.Sprintf("%v:%v", repositoryUrl, service), nil
 				}).(pulumi.StringOutput),
 			},
-			// CacheFrom: dockerbuild.CacheFromArray{
-			// 	&dockerbuild.CacheFromArgs{
-			// 		Registry: &dockerbuild.CacheFromRegistryArgs{
-			// 			Ref: ecrRepo.RepositoryUrl.ApplyT(func(repositoryUrl string) (string, error) {
-			// 				return fmt.Sprintf("%v:latest", repositoryUrl), nil
-			// 			}).(pulumi.StringOutput),
-			// 		},
-			// 	},
-			// },
+			CacheFrom: dockerbuild.CacheFromArray{
+				&dockerbuild.CacheFromArgs{
+					Registry: &dockerbuild.CacheFromRegistryArgs{
+						Ref: ecrRepo.RepositoryUrl.ApplyT(func(repositoryUrl string) (string, error) {
+							return fmt.Sprintf("%v:latest", repositoryUrl), nil
+						}).(pulumi.StringOutput),
+					},
+				},
+			},
 		})
 		if err != nil {
 			return nil, err

@@ -38,6 +38,20 @@ func NewConsumer(amqpURL, queueName string, handler MessageHandler) (*Consumer, 
 }
 
 func (c *Consumer) StartConsumer() error {
+
+	_, err := c.channel.QueueDeclare(
+		c.queueName,
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to declare queue: %w", err)
+	}
+
 	msgs, err := c.channel.Consume(
 		c.queueName,
 		"",
